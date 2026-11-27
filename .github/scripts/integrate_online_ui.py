@@ -24,8 +24,8 @@ screen = Path("app/src/main/java/com/example/game/OnlineGameScreen.kt")
 if screen.exists():
     content = screen.read_text(encoding="utf-8")
     start = content.find("        if (roomId.isBlank()) {")
-    marker = "        } else {"
-    end = content.find(marker, start + 1) if start >= 0 else -1
+    marker_match = re.search(r"^        } else {$", content[start:] if start >= 0 else "", re.MULTILINE)
+    end = (start + marker_match.start()) if marker_match else -1
     if start >= 0 and end >= 0:
         lobby = """        if (roomId.isBlank()) {
             Card(Modifier.fillMaxWidth()) {
