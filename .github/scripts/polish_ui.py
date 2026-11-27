@@ -192,8 +192,10 @@ private fun RoyalWalletScreen(
 
 '''
 anchor = "@Composable\nprivate fun ActionButtonRow("
-if (!s.includes(anchor)) throw new Error("wallet insertion anchor missing");
-if (!s.includes("private fun RoyalWalletScreen(")) s = s.replace(anchor, wallet + anchor, 1);
+if anchor not in s:
+    raise SystemExit("wallet insertion anchor missing")
+if "private fun RoyalWalletScreen(" not in s:
+    s = s.replace(anchor, wallet + anchor, 1)
 
 # Upgrade the default bot from a simple progress-first picker to a tactical
 # evaluator. The game remains offline and deterministic in its rules.
