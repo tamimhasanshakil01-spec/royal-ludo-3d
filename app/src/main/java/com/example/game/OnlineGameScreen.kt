@@ -203,7 +203,7 @@ fun OnlineGameScreen(isBangla: Boolean, modifier: Modifier = Modifier) {
         if (busy) LinearProgressIndicator(Modifier.fillMaxWidth())
         if (message.isNotBlank()) Text(message, color = MaterialTheme.colorScheme.primary)
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-        Text(if (isBangla) "এই স্ক্রিনে অনলাইন রুম, সার্ভার ডাইস ও সার্ভার বট যুক্ত। পূর্ণ 3D বোর্ড এবং স্থায়ী অ্যাকাউন্ট এখনো বাকি।" else "Online rooms, server dice and server bot are connected here. Full 3D board and durable accounts are still pending.",
+        Text(if (isBangla) "এই স্ক্রিনে অনলাইন রুম, সার্ভার ডাইস, সার্ভার বট ও 3D বোর্ড যুক্ত। স্থায়ী অ্যাকাউন্ট, Firebase ডিপ্লয় ও বাস্তব অনলাইন পরীক্ষা বাকি।" else "Online rooms, server dice, server bot and 3D board are connected here. Durable accounts, Firebase deployment and live multiplayer verification are still pending.",
             style = MaterialTheme.typography.bodySmall)
     }
 }
