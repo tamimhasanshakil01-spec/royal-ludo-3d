@@ -20,7 +20,7 @@ text = catalog.read_text(encoding="utf-8")
 if "firebase-functions =" not in text:
     text = text.replace(
         "firebase-firestore = { group = \"com.google.firebase\", name = \"firebase-firestore\" }",
-        "firebase-firestore = { group = \"com.google.firebase\", name = \"firebase-firestore\" }\\n"
+        "firebase-firestore = { group = \"com.google.firebase\", name = \"firebase-firestore\" }\n"
         "firebase-functions = { group = \"com.google.firebase\", name = \"firebase-functions\" }"
     )
 catalog.write_text(text, encoding="utf-8")
