@@ -100,3 +100,16 @@ fun SnakesAndLaddersScreen(isBangla: Boolean, modifier: Modifier = Modifier) {
         Text(active.joinToString("   ") { "${it.name}: ${it.position}" }, color = Color(0xFFB8C5D8), style = MaterialTheme.typography.bodySmall)
     }
 }
+
+@Composable
+fun RoyalGameHub(isBangla: Boolean, modifier: Modifier = Modifier) {
+    var selected by remember { mutableIntStateOf(0) }
+    Column(modifier.fillMaxSize()) {
+        Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FilterChip(selected = selected == 0, onClick = { selected = 0 }, label = { Text(if (isBangla) "♟ লুডু" else "♟ Ludo") })
+            FilterChip(selected = selected == 1, onClick = { selected = 1 }, label = { Text(if (isBangla) "🐍 সাপ-লুডু" else "🐍 Snakes & Ladders") })
+        }
+        if (selected == 0) OnlineGameScreen(isBangla = isBangla, modifier = Modifier.weight(1f))
+        else SnakesAndLaddersScreen(isBangla = isBangla, modifier = Modifier.weight(1f))
+    }
+}
