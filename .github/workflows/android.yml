@@ -20,13 +20,18 @@ jobs:
           cp -a project/. .
 
       - name: Apply Royal Arena UI polish
-        run: python3 .github/scripts/polish_ui.py project/app/src/main/java/com/example/MainActivity.kt
+        run: python3 .github/scripts/polish_ui.py app/src/main/java/com/example/MainActivity.kt
 
-      - name: Package original Android source for review
+      - name: Package final Android source for review
         uses: actions/upload-artifact@v4
         with:
           name: Royal-Ludo-Source
-          path: project/
+          path: |
+            app/
+            gradle/
+            build.gradle.kts
+            settings.gradle.kts
+            gradle.properties
           if-no-files-found: error
 
       - name: Setup Java
