@@ -60,8 +60,10 @@ if "private fun RoyalQuickStartCard(" not in s:
 
 # Upgrade the default bot from a simple progress-first picker to a tactical
 # evaluator. The game remains offline and deterministic in its rules.
-ai_start = s.find("    private fun chooseBotToken(")
-ai_end = s.find("\n    private fun detectPreset(", ai_start)
+vm_path = p.parent / "game" / "LudoViewModel.kt"
+vm_s = vm_path.read_text(encoding="utf-8")
+ai_start = vm_s.find("    private fun chooseBotToken(")
+ai_end = vm_s.find("\\n    private fun detectPreset(", ai_start)
 if ai_start < 0 or ai_end < 0:
     raise SystemExit("Could not locate chooseBotToken() for AI upgrade")
 smart_ai = """    private fun chooseBotToken(
@@ -141,6 +143,4 @@ smart_ai = """    private fun chooseBotToken(
         } ?: movableIndices.first()
     }
 """
-s = s[:ai_start] + smart_ai + s[ai_end:]
-
-p.write_text(s, encoding="utf-8")
+s = s\nvm_s = vm_s[:ai_start] + smart_ai + vm_s[ai_end:]\np.write_text(s, encoding="utf-8")\nvm_path.write_text(vm_s, encoding="utf-8")
