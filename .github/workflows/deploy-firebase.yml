@@ -1,0 +1,42 @@
+name: Deploy Royal Ludo 3D Firebase Backend
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Firebase CLI
+        run: npm install --global firebase-tools
+
+      - name: Authenticate with Firebase service account
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ROYEL_LUDO_3D }}
+        run: |
+          test -n "$FIREBASE_SERVICE_ACCOUNT" || {
+            echo "::error::Add the FIREBASE_SERVICE_ACCOUNT_ROYEL_LUDO_3D repository secret before deploying."
+            exit 1
+          }
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/firebase-service-account.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/firebase-service-account.json" >> "$GITHUB_ENV"
+
+      - name: Build and test Cloud Functions
+        working-directory: functions
+        run: |
+          npm install --no-audit --no-fund
+          npm test
+
+      - name: Deploy Firestore rules and Cloud Functions
+        run: firebase deploy --only firestore:rules,functions --project royel-ludo-3d --non-interactive
