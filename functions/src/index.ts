@@ -30,9 +30,22 @@ function checkVersion(value: unknown): number {
   return version;
 }
 
-/** Human-vs-human rooms are intentionally disabled: every player faces the bot only. */
-export const createRoom = onCall(async (_request) => {
-  throw new HttpsError("failed-precondition", "Player-versus-player rooms are disabled. Start a Royel Bot match.");
+/** Creates a private two-player room. The room remains waiting until another player joins. */
+export const createRoom = onCall(async (request) => {
+  const uid = requireUid(request);
+  const roomRef = db.collection("rooms").doc();
+  await roomRef.create({
+    status: "waiting",
+    playerUids: [uid],
+    currentTurnIndex: 0,
+    currentTurnUid: null,
+    diceValue: null,
+    stateVersion: 0,
+    gameState: { pieces: { [uid]: [-1, -1, -1, -1] }, winnerUid: null },
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp()
+  });
+  return { roomId: roomRef.id, stateVersion: 0, status: "waiting" };
 });
 
 const BOT_UID = "ROYEL_BOT";
@@ -119,9 +132,46 @@ export const playBotTurn = onCall(async (request) => {
   return response!;
 });
 
-/** Joining another player's room is intentionally disabled. */
-export const joinRoom = onCall(async (_request) => {
-  throw new HttpsError("failed-precondition", "Joining another player's room is disabled. Every player plays solo against Royel Bot.");
+/** Joins a waiting private room; the server starts the match atomically. */
+export const joinRoom = onCall(async (request) => {
+  const uid = requireUid(request);
+  const roomId = roomIdFrom(request.data);
+  const ref = db.collection("rooms").doc(roomId);
+  let stateVersion = 0;
+  await db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists) throw new HttpsError("not-found", "Room not found.");
+    const room = snap.data()!;
+    const players = Array.isArray(room.playerUids) ? room.playerUids as string[] : [];
+    if (players.includes(uid)) {
+      stateVersion = Number(room.stateVersion ?? 0);
+      return;
+    }
+    if (room.status !== "waiting") {
+      throw new HttpsError("failed-precondition", "This room is not waiting for another player.");
+    }
+    if (players.length !== 1) {
+      throw new HttpsError("failed-precondition", "This room is full or invalid.");
+    }
+    const nextPlayers = [...players, uid];
+    const oldPieces = (room.gameState?.pieces ?? {}) as Pieces;
+    const nextPieces: Pieces = { ...oldPieces, [uid]: [-1, -1, -1, -1] };
+    stateVersion = Number(room.stateVersion ?? 0) + 1;
+    tx.update(ref, {
+      status: "active",
+      playerUids: nextPlayers,
+      currentTurnIndex: 0,
+      currentTurnUid: nextPlayers[0],
+      gameState: { ...room.gameState, pieces: nextPieces, winnerUid: null },
+      stateVersion,
+      updatedAt: FieldValue.serverTimestamp()
+    });
+    tx.create(ref.collection("events").doc(), {
+      type: "player_joined", uid, stateVersion,
+      createdAt: FieldValue.serverTimestamp()
+    });
+  });
+  return { roomId, stateVersion, status: "active" };
 });
 
 export const rollDice = onCall(async (request) => {
