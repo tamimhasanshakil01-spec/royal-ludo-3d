@@ -1,21 +1,24 @@
-# Backend implementation status
+# Royal Ludo 3D — implementation and verification status
 
-## Implemented in repository
-- Firebase Android app configuration is present in `firebase/google-services.json` and copied into the Android build.
-- Firestore rules deny all client writes to game state, profiles and wallet data.
-- Callable functions require Firebase Authentication.
-- Room creation and joining are transactional; each player receives four home tokens.
-- Dice are generated server-side using cryptographic randomness.
-- `moveToken` validates membership, turn, state version, token index and legal progress on the server; captures, safe squares, exact home entry, bonus rolls and match completion are calculated server-side.
-- `passTurn` only permits a pass when no legal token move exists.
-- Game actions are recorded in immutable server-created event documents.
-- Android debug build workflow compiles and uploads a debug APK artifact.
+Last reviewed: 2026-11-28
 
-## Not yet complete or verified
-- The Android client is not yet wired to call the room, dice, move and pass callable functions or subscribe to the authoritative room state. Its current gameplay logic still runs locally.
-- Server-side bot turns, matchmaking/reconnection, account/profile flows and end-to-end online UX are not complete.
-- Emulator/unit/security tests and deployment to the Firebase project have not been run.
-- The Android workflow's successful build demonstrates compilation only, not online gameplay or release readiness.
-- Real-money deposits, wagering and withdrawals remain disabled. Any future money feature requires jurisdiction-specific legal review, compliant payment-provider approval, KYC/AML and responsible-play safeguards.
+## Verified in repository and latest successful CI run
+- Canonical app branding is `Royal Ludo 3D`; the existing Firebase project ID remains exactly `royel-ludo-3d`.
+- Firebase Android configuration exists at `firebase/google-services.json` for package `com.aistudio.royalludo.kqvmrx`.
+- Firestore rules deny client writes to rooms, events, profiles and wallet data; server-side functions own game-state mutations.
+- Firebase callable Cloud Functions implement authenticated bot-room creation, server-generated dice, validated token moves, pass-turn checks, server bot turns, and immutable game event records.
+- Android build integration adds Firebase Auth, Firestore and Functions dependencies, anonymous sign-in, callable-function transport, room-state snapshot listening, and routes the PLAY tab to the online-game screen.
+- Bot policy evaluates winning moves, captures, exposed-token threats, safe squares and progress. Dice are generated uniformly with cryptographic randomness; the bot does not manipulate dice.
+- The latest verified GitHub Actions run (`46059534184`, commit `cd00b716020c26c62fce4ed222503f8a03cce0b0`) completed successfully. Its steps passed for Cloud Functions TypeScript build/tests, Android Firebase integration, UI integration, branding, source packaging, and debug APK assembly.
+- That run uploaded `Royal-Ludo-3D-APK`, `Royal-Ludo-Source`, and `Royal-Firebase-SHA1-Fingerprint` artifacts.
+- The current unit-test file contains tests for legal moves, captures, safe squares, victory, turn order and bot decision-making; the latest CI test step passed.
 
-Do not advertise the app as a completed online multiplayer game until client integration, tests, deployment and end-to-end verification pass.
+## Known limitations and work still required
+- This backend currently implements human-versus-bot rooms only. `createRoom` and `joinRoom` deliberately reject human-versus-human play; matchmaking and player-versus-player online rooms are not implemented.
+- Account/profile management, reconnect/resume flows, leaderboards, and production monitoring are not verified as complete.
+- Firebase deployment has not been performed or verified. The successful CI run builds and tests code but does not deploy Firestore rules or Cloud Functions.
+- Firestore emulator/security-rule tests and a real-device end-to-end test against the deployed Firebase project remain outstanding.
+- The uploaded APK is a debug build, not a signed production release. Installation and gameplay on the user's device still need verification.
+- Real-money deposits, wagering and withdrawals are intentionally disabled and are outside this completion stage. Any future money features require legal review, approved payment-provider support, KYC/AML and responsible-play safeguards.
+
+Do not describe the app as production-ready or as completed human-versus-human online multiplayer until deployment, real-device end-to-end testing and the required feature work pass.
