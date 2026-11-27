@@ -283,5 +283,61 @@ smart_ai = """    private fun chooseBotToken(
     }
 """
 vm_s = vm_s[:ai_start] + smart_ai + vm_s[ai_end:]
+
+# Add a persistent in-app Bangla/English switch in the header and key navigation.
+if "var isBangla by rememberSaveable" not in s:
+    s = s.replace(
+        '    var activeTab by rememberSaveable { mutableStateOf(AppTab.PLAY) }',
+        '    var activeTab by rememberSaveable { mutableStateOf(AppTab.PLAY) }\\n    var isBangla by rememberSaveable { mutableStateOf(true) }'
+    )
+s = s.replace(
+    '                            onOpenProfiles = { editingIdentityPlayer = uiState.currentTurn },',
+    '                            onOpenProfiles = { editingIdentityPlayer = uiState.currentTurn },\\n                            isBangla = isBangla,\\n                            onToggleLanguage = { isBangla = !isBangla },'
+)
+s = s.replace(
+    '                            onOpenProfiles: () -> Unit,\\n    modifier: Modifier = Modifier',
+    '                            onOpenProfiles: () -> Unit,\\n    isBangla: Boolean,\\n    onToggleLanguage: () -> Unit,\\n    modifier: Modifier = Modifier'
+)
+# Replace navigation labels with language-aware labels.
+s = s.replace('label = { Text(stringResource(R.string.nav_play)) }', 'label = { Text(if (isBangla) "খেলা" else "Play") }')
+s = s.replace('label = { Text(stringResource(R.string.nav_invite)) }', 'label = { Text(if (isBangla) "আমন্ত্রণ" else "Invite") }')
+s = s.replace('label = { Text("ওয়ালেট") }', 'label = { Text(if (isBangla) "ওয়ালেট" else "Wallet") }')
+# Wallet page content follows the selected language.
+s = s.replace('''RoyalWalletScreen(
+                                    onDeposit = {''', '''RoyalWalletScreen(
+                                    isBangla = isBangla,
+                                    onDeposit = {''')
+s = s.replace('''private fun RoyalWalletScreen(
+    onDeposit: () -> Unit,''', '''private fun RoyalWalletScreen(
+    isBangla: Boolean,
+    onDeposit: () -> Unit,''')
+s = s.replace('Text("ROYAL WALLET", style = MaterialTheme.typography.headlineSmall, color = RoyalGold)',
+'''Text(if (isBangla) "রয়্যাল ওয়ালেট" else "ROYAL WALLET", style = MaterialTheme.typography.headlineSmall, color = RoyalGold)''')
+s = s.replace('Text("ওয়ালেট ব্যালেন্স", style = MaterialTheme.typography.labelLarge, color = RoyalTextSecondary)',
+'''Text(if (isBangla) "ওয়ালেট ব্যালেন্স" else "Wallet balance", style = MaterialTheme.typography.labelLarge, color = RoyalTextSecondary)''')
+s = s.replace('Text("৳ ০.০০", style = MaterialTheme.typography.displaySmall, color = RoyalGold)',
+'''Text(if (isBangla) "৳ ০.০০" else "৳ 0.00", style = MaterialTheme.typography.displaySmall, color = RoyalGold)''')
+s = s.replace('Text("এটি কেবল ডেমো ব্যালেন্স; বাস্তব অর্থ নয়।", style = MaterialTheme.typography.bodySmall, color = RoyalTextSecondary)',
+'''Text(if (isBangla) "এটি কেবল ডেমো ব্যালেন্স; বাস্তব অর্থ নয়।" else "Demo balance only — not real money.", style = MaterialTheme.typography.bodySmall, color = RoyalTextSecondary)''')
+s = s.replace('''            ) { Text("＋ টাকা জমা") }''', '''            ) { Text(if (isBangla) "＋ টাকা জমা" else "＋ Deposit") }''')
+s = s.replace('''            ) { Text("↑ টাকা উত্তোলন", color = RoyalGold) }''', '''            ) { Text(if (isBangla) "↑ টাকা উত্তোলন" else "↑ Withdraw", color = RoyalGold) }''')
+s = s.replace('Text("লেনদেনের অবস্থা", style = MaterialTheme.typography.titleMedium, color = RoyalGold)',
+'''Text(if (isBangla) "লেনদেনের অবস্থা" else "Transaction status", style = MaterialTheme.typography.titleMedium, color = RoyalGold)''')
+s = s.replace('''            Text("জমা ও উত্তোলনের অপশন রাখা হয়েছে। তবে এখনো কোনো পেমেন্ট গেটওয়ে, ব্যাংক/মোবাইল অ্যাকাউন্ট বা সার্ভার যুক্ত করা হয়নি।", color = RoyalTextPrimary, style = MaterialTheme.typography.bodyMedium)
+            Text("নিরাপত্তা ও প্রয়োজনীয় আইনগত অনুমোদন নিশ্চিত না হওয়া পর্যন্ত বাস্তব টাকা পাঠাবেন না।", color = RoyalTextSecondary, style = MaterialTheme.typography.bodySmall)''',
+'''            Text(if (isBangla) "জমা ও উত্তোলনের অপশন রাখা হয়েছে। তবে এখনো কোনো পেমেন্ট গেটওয়ে, ব্যাংক/মোবাইল অ্যাকাউন্ট বা সার্ভার যুক্ত করা হয়নি।" else "Deposit and withdrawal are demo-only. No payment gateway, bank/mobile account, or server is connected.", color = RoyalTextPrimary, style = MaterialTheme.typography.bodyMedium)
+            Text(if (isBangla) "নিরাপত্তা ও প্রয়োজনীয় আইনগত অনুমোদন নিশ্চিত না হওয়া পর্যন্ত বাস্তব টাকা পাঠাবেন না।" else "Do not send real money until security and legal approvals are in place.", color = RoyalTextSecondary, style = MaterialTheme.typography.bodySmall)''')
+# Header control is visible on all tabs and preserves selection during recomposition.
+s = s.replace('''            IconButton(
+                onClick = onOpenProfiles,''', '''            OutlinedButton(
+                onClick = onToggleLanguage,
+                modifier = Modifier.height(38.dp).testTag("language_toggle"),
+                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),
+                shape = RoundedCornerShape(18.dp)
+            ) { Text(if (isBangla) "EN" else "বাংলা", color = RoyalGold) }
+
+            IconButton(
+                onClick = onOpenProfiles,''', 1)
+
 p.write_text(s, encoding="utf-8")
 vm_path.write_text(vm_s, encoding="utf-8")
