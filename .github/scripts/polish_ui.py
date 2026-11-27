@@ -288,15 +288,15 @@ vm_s = vm_s[:ai_start] + smart_ai + vm_s[ai_end:]
 if "var isBangla by rememberSaveable" not in s:
     s = s.replace(
         '    var activeTab by rememberSaveable { mutableStateOf(AppTab.PLAY) }',
-        '    var activeTab by rememberSaveable { mutableStateOf(AppTab.PLAY) }\\n    var isBangla by rememberSaveable { mutableStateOf(true) }'
+        '    var activeTab by rememberSaveable { mutableStateOf(AppTab.PLAY) }\n    var isBangla by rememberSaveable { mutableStateOf(true) }'
     )
 s = s.replace(
     '                            onOpenProfiles = { editingIdentityPlayer = uiState.currentTurn },',
-    '                            onOpenProfiles = { editingIdentityPlayer = uiState.currentTurn },\\n                            isBangla = isBangla,\\n                            onToggleLanguage = { isBangla = !isBangla },'
+    '                            onOpenProfiles = { editingIdentityPlayer = uiState.currentTurn },\n                            isBangla = isBangla,\n                            onToggleLanguage = { isBangla = !isBangla },'
 )
 s = s.replace(
-    '                            onOpenProfiles: () -> Unit,\\n    modifier: Modifier = Modifier',
-    '                            onOpenProfiles: () -> Unit,\\n    isBangla: Boolean,\\n    onToggleLanguage: () -> Unit,\\n    modifier: Modifier = Modifier'
+    '                            onOpenProfiles: () -> Unit,\n    modifier: Modifier = Modifier',
+    '                            onOpenProfiles: () -> Unit,\n    isBangla: Boolean,\n    onToggleLanguage: () -> Unit,\n    modifier: Modifier = Modifier'
 )
 # Replace navigation labels with language-aware labels.
 s = s.replace('label = { Text(stringResource(R.string.nav_play)) }', 'label = { Text(if (isBangla) "খেলা" else "Play") }')
