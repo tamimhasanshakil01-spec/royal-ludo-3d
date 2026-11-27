@@ -2,7 +2,7 @@ import { initializeApp } from "firebase-admin/app";
 import { FieldValue, getFirestore } from "firebase-admin/firestore";
 import { randomInt } from "node:crypto";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
-import { applyMove, legalTokenIndices, nextTurn, Pieces } from "./ludo";
+import { applyMove, chooseBotTokenIndex, legalTokenIndices, nextTurn, Pieces } from "./ludo";
 
 initializeApp();
 const db = getFirestore();
@@ -45,6 +45,90 @@ export const createRoom = onCall(async (request) => {
     updatedAt: FieldValue.serverTimestamp()
   });
   return { roomId: roomRef.id, stateVersion: 0 };
+});
+
+const BOT_UID = "ROYEL_BOT";
+
+/** Creates a real server-authoritative human-vs-bot room. */
+export const createBotRoom = onCall(async (request) => {
+  const uid = requireUid(request);
+  const roomRef = db.collection("rooms").doc();
+  await roomRef.create({
+    status: "active",
+    playerUids: [uid, BOT_UID],
+    currentTurnIndex: 0,
+    currentTurnUid: uid,
+    diceValue: null,
+    stateVersion: 0,
+    gameState: { pieces: { [uid]: [-1, -1, -1, -1], [BOT_UID]: [-1, -1, -1, -1] }, winnerUid: null },
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp()
+  });
+  return { roomId: roomRef.id, stateVersion: 0, opponent: "Royel Bot" };
+});
+
+/** Executes one bot turn on the trusted server; clients cannot choose bot dice or moves. */
+export const playBotTurn = onCall(async (request) => {
+  const uid = requireUid(request);
+  const roomId = roomIdFrom(request.data);
+  const expectedVersion = checkVersion(request.data?.stateVersion);
+  const ref = db.collection("rooms").doc(roomId);
+  let response: Record<string, unknown> | null = null;
+  await db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists) throw new HttpsError("not-found", "Room not found.");
+    const room = snap.data()!;
+    const players = room.playerUids as string[];
+    if (!players.includes(uid)) throw new HttpsError("permission-denied", "You are not in this room.");
+    if (room.status !== "active" || room.currentTurnUid !== BOT_UID) {
+      throw new HttpsError("failed-precondition", "It is not the bot's turn.");
+    }
+    if (room.stateVersion !== expectedVersion) throw new HttpsError("aborted", "Game state changed. Refresh and retry.");
+    const pieces = (room.gameState?.pieces ?? {}) as Pieces;
+    const dice = randomInt(1, 7);
+    const tokenIndex = chooseBotTokenIndex(players, pieces, BOT_UID, dice);
+    const nextVersion = expectedVersion + 1;
+    if (tokenIndex === null) {
+      const nextIndex = nextTurn(players, Number(room.currentTurnIndex));
+      tx.update(ref, {
+        diceValue: null,
+        currentTurnIndex: nextIndex,
+        currentTurnUid: players[nextIndex],
+        stateVersion: nextVersion,
+        updatedAt: FieldValue.serverTimestamp()
+      });
+      tx.create(ref.collection("events").doc(), {
+        type: "bot_turn_passed", uid: BOT_UID, dice,
+        stateVersion: nextVersion, createdAt: FieldValue.serverTimestamp()
+      });
+      response = { stateVersion: nextVersion, diceValue: dice, tokenIndex: null, passed: true };
+      return;
+    }
+    const result = applyMove(players, pieces, BOT_UID, tokenIndex, dice);
+    const nextIndex = result.bonusRoll ? Number(room.currentTurnIndex) : nextTurn(players, Number(room.currentTurnIndex));
+    const nextUid = result.bonusRoll ? BOT_UID : players[nextIndex];
+    const status = result.winnerUid ? "completed" : "active";
+    tx.update(ref, {
+      gameState: { ...(room.gameState ?? {}), pieces: result.pieces, winnerUid: result.winnerUid },
+      diceValue: null,
+      currentTurnIndex: nextIndex,
+      currentTurnUid: nextUid,
+      status,
+      winnerUid: result.winnerUid,
+      stateVersion: nextVersion,
+      lastActionUid: BOT_UID,
+      updatedAt: FieldValue.serverTimestamp()
+    });
+    tx.create(ref.collection("events").doc(), {
+      type: "bot_token_moved", uid: BOT_UID, tokenIndex, dice,
+      capturedUids: result.capturedUids, winnerUid: result.winnerUid,
+      bonusRoll: result.bonusRoll, stateVersion: nextVersion,
+      createdAt: FieldValue.serverTimestamp()
+    });
+    response = { stateVersion: nextVersion, diceValue: dice, tokenIndex,
+      pieces: result.pieces, winnerUid: result.winnerUid, bonusRoll: result.bonusRoll };
+  });
+  return response!;
 });
 
 export const joinRoom = onCall(async (request) => {
