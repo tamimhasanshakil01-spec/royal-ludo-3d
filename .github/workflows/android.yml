@@ -76,6 +76,17 @@ jobs:
             -keysize 2048 \
             -validity 10000
 
+      - name: Export Firebase Google Sign-In SHA-1
+        run: |
+          keytool -list -v -keystore debug.keystore -storepass android -alias androiddebugkey | tee firebase-sha1.txt
+          grep -E 'SHA1:' firebase-sha1.txt
+
+      - name: Upload Firebase signing fingerprint
+        uses: actions/upload-artifact@v4
+        with:
+          name: Firebase-SHA1-Fingerprint
+          path: firebase-sha1.txt
+
       - name: Build APK
         run: |
           gradle --no-daemon :app:assembleDebug
