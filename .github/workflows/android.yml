@@ -19,6 +19,13 @@ jobs:
           unzip -o royal-ludo-3d.zip -d project
           cp -a project/. .
 
+      - name: Package original Android source for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: Royal-Ludo-Source
+          path: project/
+          if-no-files-found: error
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
