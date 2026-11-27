@@ -49,13 +49,13 @@ jobs:
           from pathlib import Path
           strings = Path('app/src/main/res/values/strings.xml')
           s = strings.read_text(encoding='utf-8')
-          s = s.replace('Royal Ludo 3D', 'Royal Ludo 3D').replace('ROYAL LUDO 3D', 'ROYEL LUDO 3D').replace('ROYAL WALLET', 'ROYEL WALLET')
+          s = s.replace('Royel Ludo 3D', 'Royal Ludo 3D').replace('ROYEL LUDO 3D', 'ROYAL LUDO 3D').replace('ROYEL WALLET', 'ROYAL WALLET')
           strings.write_text(s, encoding='utf-8')
           main = Path('app/src/main/java/com/example/MainActivity.kt')
           s = main.read_text(encoding='utf-8')
-          s = s.replace('ROYAL LUDO 3D', 'ROYEL LUDO 3D').replace('ROYAL WALLET', 'ROYEL WALLET')
+          s = s.replace('ROYEL LUDO 3D', 'ROYAL LUDO 3D').replace('ROYEL WALLET', 'ROYAL WALLET')
           main.write_text(s, encoding='utf-8')
-          print('App branding set to Royal Ludo 3D; Firebase project identifiers left unchanged.')
+          print('App branding standardized to Royal Ludo 3D; Firebase project ID retained to preserve the existing connection.')
           PY
 
       - name: Package final Android source for review
