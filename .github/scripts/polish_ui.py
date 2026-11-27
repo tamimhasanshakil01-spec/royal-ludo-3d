@@ -385,7 +385,7 @@ icon_path.write_text("""<?xml version="1.0" encoding="utf-8"?>
 # Premium Royal Ludo lobby: make this the first screen shown when the APK opens.
 # The actual game remains behind PLAY NOW; this lobby is real Compose UI, not a
 # flattened screenshot, so its controls remain interactive and accessible.
-main_path = p.parent.parent / "src" / "main" / "java" / "com" / "example" / "MainActivity.kt"
+main_path = p
 ms = main_path.read_text(encoding="utf-8")
 
 ms = ms.replace("enum class AppTab {\\n    PLAY,", "enum class AppTab {\\n    HOME,\\n    PLAY,", 1)
