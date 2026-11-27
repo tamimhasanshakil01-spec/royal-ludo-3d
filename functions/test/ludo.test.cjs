@@ -75,3 +75,15 @@ test("server bot returns null when no move is legal", () => {
     ROYEL_BOT: [HOME, HOME, HOME, HOME]
   }, "ROYEL_BOT", 3), null);
 });
+
+
+test("server bot avoids landing in immediate capture range when a safer move exists", () => {
+  const players = ["human", "ROYEL_BOT"];
+  const pieces = {
+    human: [17, HOME, HOME, HOME],
+    ROYEL_BOT: [9, 0, HOME, HOME]
+  };
+  // Moving bot token 0 from 9 to 10 lands six squares ahead of the human.
+  // Token 1 can advance safely, so the defensive policy should choose token 1.
+  assert.equal(chooseBotTokenIndex(players, pieces, "ROYEL_BOT", 1), 1);
+});
