@@ -20,7 +20,6 @@ fun OnlineGameScreen(isBangla: Boolean, modifier: Modifier = Modifier) {
     var uid by remember { mutableStateOf<String?>(null) }
     var roomId by remember { mutableStateOf("") }
     var room by remember { mutableStateOf<Map<String, Any>?>(null) }
-    var joinCode by remember { mutableStateOf("") }
     var busy by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
@@ -113,24 +112,6 @@ fun OnlineGameScreen(isBangla: Boolean, modifier: Modifier = Modifier) {
                     }, enabled = !busy && uid != null, modifier = Modifier.fillMaxWidth()) {
                         Text(if (isBangla) "সার্ভার বটের সাথে খেলুন" else "Play server bot")
                     }
-                    OutlinedButton(onClick = {
-                        handle(repo.createRoom()) { result ->
-                            roomId = result["roomId"].toString()
-                            message = if (isBangla) "রুম তৈরি হয়েছে" else "Room created"
-                        }
-                    }, enabled = !busy && uid != null, modifier = Modifier.fillMaxWidth()) {
-                        Text(if (isBangla) "বন্ধুর জন্য রুম তৈরি" else "Create room for a friend")
-                    }
-                    OutlinedTextField(joinCode, { joinCode = it },
-                        label = { Text(if (isBangla) "বন্ধুর রুম কোড" else "Friend's room code") },
-                        modifier = Modifier.fillMaxWidth())
-                    OutlinedButton(onClick = {
-                        handle(repo.joinRoom(joinCode.trim())) { result ->
-                            roomId = result["roomId"].toString()
-                            message = if (isBangla) "রুমে যোগ দিয়েছেন" else "Joined room"
-                        }
-                    }, enabled = !busy && uid != null && joinCode.isNotBlank(), modifier = Modifier.fillMaxWidth()) {
-                        Text(if (isBangla) "রুমে যোগ দিন" else "Join room")
                     }
                 }
             }
@@ -139,9 +120,8 @@ fun OnlineGameScreen(isBangla: Boolean, modifier: Modifier = Modifier) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(if (isBangla) "রুম কোড" else "Room code", style = MaterialTheme.typography.labelLarge)
                     Text(roomId, style = MaterialTheme.typography.headlineSmall)
-                    Text(if (isBangla) "বন্ধুকে কোডটি পাঠান" else "Share this code with your friend")
                     Text("Status: ${room?.get("status") ?: "connecting"}")
-                    Text("${if (isBangla) "খেলোয়াড়" else "Players"}: ${players.size}/4")
+                    Text("${if (isBangla) "খেলোয়াড়" else "Players"}: ${players.size}/2")
                     players.forEachIndexed { index, player ->
                         Text("${index + 1}. ${if (player == botUid) "Royel Bot" else if (player == uid) (if (isBangla) "আপনি" else "You") else player.take(8)}")
                     }
@@ -196,14 +176,14 @@ fun OnlineGameScreen(isBangla: Boolean, modifier: Modifier = Modifier) {
                     }
                 }
             }
-            OutlinedButton(onClick = { roomId = ""; room = null; joinCode = ""; message = "" }, modifier = Modifier.fillMaxWidth()) {
+            OutlinedButton(onClick = { roomId = ""; room = null; message = "" }, modifier = Modifier.fillMaxWidth()) {
                 Text(if (isBangla) "লবি-তে ফিরুন" else "Back to lobby")
             }
         }
         if (busy) LinearProgressIndicator(Modifier.fillMaxWidth())
         if (message.isNotBlank()) Text(message, color = MaterialTheme.colorScheme.primary)
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-        Text(if (isBangla) "এই স্ক্রিনে অনলাইন রুম, সার্ভার ডাইস, সার্ভার বট ও 3D বোর্ড যুক্ত। স্থায়ী অ্যাকাউন্ট, Firebase ডিপ্লয় ও বাস্তব অনলাইন পরীক্ষা বাকি।" else "Online rooms, server dice, server bot and 3D board are connected here. Durable accounts, Firebase deployment and live multiplayer verification are still pending.",
+        Text(if (isBangla) "প্রতিটি খেলোয়াড় শুধু সার্ভার বটের বিপক্ষে একক ম্যাচ খেলবে। সার্ভার ডাইস ও 3D বোর্ড যুক্ত; স্থায়ী অ্যাকাউন্ট, Firebase ডিপ্লয় ও বাস্তব পরীক্ষা বাকি।" else "Only solo human-vs-bot rooms are available. Server dice, server bot and 3D board are connected. Durable accounts, Firebase deployment and live verification are still pending.",
             style = MaterialTheme.typography.bodySmall)
     }
 }
