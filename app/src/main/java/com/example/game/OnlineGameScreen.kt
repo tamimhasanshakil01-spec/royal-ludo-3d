@@ -114,7 +114,6 @@ fun OnlineGameScreen(isBangla: Boolean, modifier: Modifier = Modifier) {
                     }
                     }
                 }
-            }
         } else {
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
