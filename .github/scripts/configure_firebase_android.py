@@ -14,7 +14,7 @@ text = text.replace("  // implementation(libs.firebase.auth)",
 if "implementation(libs.firebase.functions)" not in text:
     text = text.replace(
         "  implementation(libs.firebase.auth)",
-        "  implementation(libs.firebase.auth)\\n  implementation(libs.firebase.functions)"
+        "  implementation(libs.firebase.auth)\n  implementation(libs.firebase.functions)"
     )
 gradle.write_text(text, encoding="utf-8")
 
