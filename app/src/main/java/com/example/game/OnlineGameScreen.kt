@@ -102,18 +102,26 @@ fun OnlineGameScreen(isBangla: Boolean, modifier: Modifier = Modifier) {
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(if (isBangla) "অনলাইন ম্যাচ শুরু করুন" else "Start an online match", style = MaterialTheme.typography.titleLarge)
-                    Button(onClick = {
-                        repo.ensureSignedIn().addOnCompleteListener { auth ->
-                            if (auth.isSuccessful) handle(repo.createBotRoom()) { result ->
-                                roomId = result["roomId"].toString()
-                                message = if (isBangla) "বট ম্যাচ তৈরি হয়েছে" else "Bot match created"
-                            } else error = auth.exception?.localizedMessage
-                        }
-                    }, enabled = !busy && uid != null, modifier = Modifier.fillMaxWidth()) {
+                    Button(
+                        onClick = {
+                            repo.ensureSignedIn().addOnCompleteListener { auth ->
+                                if (auth.isSuccessful) {
+                                    handle(repo.createBotRoom()) { result ->
+                                        roomId = result["roomId"].toString()
+                                        message = if (isBangla) "বট ম্যাচ তৈরি হয়েছে" else "Bot match created"
+                                    }
+                                } else {
+                                    error = auth.exception?.localizedMessage ?: "Sign-in failed"
+                                }
+                            }
+                        },
+                        enabled = !busy && uid != null,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
                         Text(if (isBangla) "সার্ভার বটের সাথে খেলুন" else "Play server bot")
                     }
-                    }
                 }
+            }
         } else {
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
