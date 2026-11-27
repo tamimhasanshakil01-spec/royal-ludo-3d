@@ -1,4 +1,4 @@
-name: Deploy Royal Ludo 3D Firebase Backend
+name: Deploy Royal Ludo 3D Firestore Rules (Free Tier)
 
 on:
   workflow_dispatch:
@@ -7,7 +7,7 @@ permissions:
   contents: read
 
 jobs:
-  deploy:
+  deploy-rules:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -32,11 +32,5 @@ jobs:
           printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/firebase-service-account.json"
           echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/firebase-service-account.json" >> "$GITHUB_ENV"
 
-      - name: Build and test Cloud Functions
-        working-directory: functions
-        run: |
-          npm install --no-audit --no-fund
-          npm test
-
-      - name: Deploy Firestore rules and Cloud Functions
-        run: firebase deploy --only firestore:rules,functions --project royel-ludo-3d --non-interactive
+      - name: Deploy Firestore security rules only (no paid Cloud Functions)
+        run: firebase deploy --only firestore:rules --project royel-ludo-3d --non-interactive
