@@ -87,3 +87,33 @@ export function nextTurn(playerUids: string[], currentIndex: number): number {
   if (playerUids.length < 2 || playerUids.length > 4) throw new Error("Room must have 2–4 players.");
   return (currentIndex + 1) % playerUids.length;
 }
+
+
+/** Server-side bot policy. Scores legal moves by win, capture, goal progress,
+ * safe-square arrival and leaving home; deterministic tie-break avoids client control. */
+export function chooseBotTokenIndex(
+  playerUids: string[],
+  pieces: Pieces,
+  uid: string,
+  dice: number
+): number | null {
+  const legal = legalTokenIndices(pieces[uid] ?? [], dice);
+  if (legal.length === 0) return null;
+  const seat = playerUids.indexOf(uid);
+  const scored = legal.map(index => {
+    const result = applyMove(playerUids, pieces, uid, index, dice);
+    const progress = result.pieces[uid][index];
+    const absolute = absoluteTrack(seat, progress);
+    const captured = result.capturedUids.length;
+    const score =
+      (result.winnerUid === uid ? 100000 : 0) +
+      captured * 10000 +
+      (progress === GOAL ? 3000 : 0) +
+      (absolute !== null && SAFE.has(absolute) ? 500 : 0) +
+      (pieces[uid][index] === HOME ? 250 : 0) +
+      progress * 10;
+    return { index, score };
+  });
+  scored.sort((a, b) => b.score - a.score || a.index - b.index);
+  return scored[0].index;
+}
