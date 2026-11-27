@@ -20,16 +20,12 @@ jobs:
           cp -a project/. .
 
       - name: Configure Firebase Android SDK
-        env:
-          GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
         run: |
           python3 .github/scripts/configure_firebase_android.py
-          if [ -n "$GOOGLE_SERVICES_JSON_BASE64" ]; then
-            printf '%s' "$GOOGLE_SERVICES_JSON_BASE64" | base64 --decode > app/google-services.json
-            echo "Firebase Android app configuration installed."
-          else
-            echo "::warning::Firebase SDK added, but GOOGLE_SERVICES_JSON_BASE64 secret is not set; runtime Firebase connection will remain unconfigured."
-          fi
+          mkdir -p app
+          cp firebase/google-services.json app/google-services.json
+          test -s app/google-services.json
+          echo "Matching Firebase Android app configuration installed."
 
       - name: Apply Royal Arena UI polish
         run: python3 .github/scripts/polish_ui.py app/src/main/java/com/example/MainActivity.kt
