@@ -89,8 +89,26 @@ export function nextTurn(playerUids: string[], currentIndex: number): number {
 }
 
 
-/** Server-side bot policy. Scores legal moves by win, capture, goal progress,
- * safe-square arrival and leaving home; deterministic tie-break avoids client control. */
+/** Count opponent tokens that could capture this token on their next fair dice roll. */
+function immediateThreats(playerUids: string[], pieces: Pieces, uid: string, progress: number): number {
+  const seat = playerUids.indexOf(uid);
+  const target = absoluteTrack(seat, progress);
+  if (target === null || SAFE.has(target)) return 0;
+  let threats = 0;
+  playerUids.forEach((opponentUid, opponentSeat) => {
+    if (opponentUid === uid) return;
+    for (const opponentProgress of pieces[opponentUid] ?? []) {
+      const from = absoluteTrack(opponentSeat, opponentProgress);
+      if (from === null) continue;
+      const distance = (target - from + 52) % 52;
+      if (distance >= 1 && distance <= 6) threats++;
+    }
+  });
+  return threats;
+}
+
+/** Strong server-side policy: win/capture first, protect exposed tokens, use safe squares,
+ * advance toward goal, and break ties deterministically. Dice remain uniformly random. */
 export function chooseBotTokenIndex(
   playerUids: string[],
   pieces: Pieces,
@@ -105,13 +123,18 @@ export function chooseBotTokenIndex(
     const progress = result.pieces[uid][index];
     const absolute = absoluteTrack(seat, progress);
     const captured = result.capturedUids.length;
+    const threatsBefore = immediateThreats(playerUids, pieces, uid, pieces[uid][index]);
+    const threatsAfter = immediateThreats(playerUids, result.pieces, uid, progress);
+    const escapedThreat = Math.max(0, threatsBefore - threatsAfter);
     const score =
-      (result.winnerUid === uid ? 100000 : 0) +
-      captured * 10000 +
-      (progress === GOAL ? 3000 : 0) +
-      (absolute !== null && SAFE.has(absolute) ? 500 : 0) +
-      (pieces[uid][index] === HOME ? 250 : 0) +
-      progress * 10;
+      (result.winnerUid === uid ? 1000000 : 0) +
+      captured * 20000 +
+      (progress === GOAL ? 5000 : 0) +
+      escapedThreat * 1800 -
+      threatsAfter * 2400 +
+      (absolute !== null && SAFE.has(absolute) ? 900 : 0) +
+      (pieces[uid][index] === HOME ? 350 : 0) +
+      progress * 12;
     return { index, score };
   });
   scored.sort((a, b) => b.score - a.score || a.index - b.index);
