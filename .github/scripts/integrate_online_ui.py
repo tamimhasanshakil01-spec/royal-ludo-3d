@@ -52,6 +52,6 @@ if screen.exists():
                 }
             }
         } else {"""
-        content = content[:start] + lobby + content[end + len(marker):]
+        content = content[:start] + lobby + content[end + len("        } else {"): ]
         screen.write_text(content, encoding="utf-8")
         print("Normalized online game lobby Kotlin braces.")
