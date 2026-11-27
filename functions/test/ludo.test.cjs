@@ -1,6 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { HOME, GOAL, SAFE, legalTokenIndices, applyMove, nextTurn } = require("../lib/ludo.js");
+const { HOME, GOAL, SAFE, legalTokenIndices, applyMove, nextTurn, chooseBotTokenIndex } = require("../lib/ludo.js");
 
 test("a token leaves home only on a six", () => {
   assert.deepEqual(legalTokenIndices([HOME, 0, 55, GOAL], 5), [1]);
@@ -48,4 +48,30 @@ test("winning requires all four tokens to reach the goal", () => {
 
 test("turn order wraps around the seated players", () => {
   assert.equal(nextTurn(["a", "b", "c"], 2), 0);
+});
+
+
+test("server bot selects a winning move over all alternatives", () => {
+  const players = ["human", "ROYEL_BOT"];
+  const pieces = {
+    human: [HOME, HOME, HOME, HOME],
+    ROYEL_BOT: [55, 10, HOME, HOME]
+  };
+  assert.equal(chooseBotTokenIndex(players, pieces, "ROYEL_BOT", 1), 0);
+});
+
+test("server bot prioritizes a legal capture", () => {
+  const players = ["human", "ROYEL_BOT"];
+  const pieces = {
+    human: [0, HOME, HOME, HOME],
+    ROYEL_BOT: [40, HOME, HOME, HOME]
+  };
+  assert.equal(chooseBotTokenIndex(players, pieces, "ROYEL_BOT", 1), 0);
+});
+
+test("server bot returns null when no move is legal", () => {
+  assert.equal(chooseBotTokenIndex(["human", "ROYEL_BOT"], {
+    human: [HOME, HOME, HOME, HOME],
+    ROYEL_BOT: [HOME, HOME, HOME, HOME]
+  }, "ROYEL_BOT", 3), null);
 });
