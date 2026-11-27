@@ -26,3 +26,8 @@ The GitHub Actions Android workflow builds the app and type-checks/tests Cloud F
 - Confirm both devices see the same room state and turns update live.
 - Roll dice and attempt legal/illegal moves; verify the server accepts only legal moves and prevents out-of-turn actions.
 - Play a separate server-bot match and confirm the bot acts only when its turn begins.
+
+
+## Automated Firebase deployment
+
+The manual GitHub Actions workflow **Deploy Royal Ludo 3D Firebase Backend** uses the repository Actions secret named `FIREBASE_SERVICE_ACCOUNT_ROYEL_LUDO_3D`. Its value must be the full JSON key for a Google Cloud service account authorized to deploy Cloud Functions and Firestore rules to project `royel-ludo-3d`. After the secret is configured, run that workflow from the Actions tab. Do not commit the JSON key to the repository.
