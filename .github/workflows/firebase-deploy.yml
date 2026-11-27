@@ -1,4 +1,4 @@
-name: Deploy Royal Ludo 3D Firebase Backend
+name: Deploy Royal Ludo 3D Firestore Rules (Free Tier)
 
 on:
   workflow_dispatch:
@@ -7,7 +7,7 @@ permissions:
   contents: read
 
 jobs:
-  deploy:
+  deploy-rules:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -18,19 +18,12 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Build and test Cloud Functions
-        working-directory: functions
-        run: |
-          npm install --no-audit --no-fund
-          npm run build
-          npm test
-
       - name: Check Firebase deployment credential
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ROYEL_LUDO_3D }}
         run: |
           if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
-            echo "::error::Missing GitHub Actions secret FIREBASE_SERVICE_ACCOUNT_ROYEL_LUDO_3D. Add the Firebase deploy service-account JSON as a repository Actions secret."
+            echo "::error::Missing GitHub Actions secret FIREBASE_SERVICE_ACCOUNT_ROYEL_LUDO_3D."
             exit 1
           fi
 
@@ -42,5 +35,5 @@ jobs:
       - name: Set up Firebase CLI
         run: npm install --global firebase-tools
 
-      - name: Deploy Firestore rules and Cloud Functions
-        run: firebase deploy --only firestore:rules,functions --project royel-ludo-3d
+      - name: Deploy Firestore security rules only (no paid Cloud Functions)
+        run: firebase deploy --only firestore:rules --project royel-ludo-3d --non-interactive
