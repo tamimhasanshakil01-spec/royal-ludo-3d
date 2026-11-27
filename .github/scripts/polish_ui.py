@@ -388,7 +388,7 @@ icon_path.write_text("""<?xml version="1.0" encoding="utf-8"?>
 main_path = p
 ms = main_path.read_text(encoding="utf-8")
 
-ms = ms.replace("enum class AppTab {\\n    PLAY,", "enum class AppTab {\\n    HOME,\\n    PLAY,", 1)
+ms = ms.replace("enum class AppTab {\n    PLAY,", "enum class AppTab {\n    HOME,\n    PLAY,", 1)
 ms = ms.replace("var activeTab by rememberSaveable { mutableStateOf(AppTab.PLAY) }",
                 "var activeTab by rememberSaveable { mutableStateOf(AppTab.HOME) }", 1)
 ms = ms.replace("if (activeTab != AppTab.PLAY) {\\n        BackHandler { activeTab = AppTab.PLAY }",
