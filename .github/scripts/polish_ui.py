@@ -58,6 +58,143 @@ if anchor not in s:
 if "private fun RoyalQuickStartCard(" not in s:
     s = s.replace(anchor, card + anchor, 1)
 
+
+// Wallet tab: UI-only placeholders, with no account collection or real-money flow.
+s = s.replace("    INVITE\n}", "    INVITE,\n    WALLET\n}")
+s = s.replace('''                                modifier = Modifier.testTag("nav_invite")
+                            )
+                        }
+                    }
+                }''', '''                                modifier = Modifier.testTag("nav_invite")
+                            )
+                            NavigationBarItem(
+                                selected = activeTab == AppTab.WALLET,
+                                onClick = { activeTab = AppTab.WALLET },
+                                icon = { Text("৳") },
+                                label = { Text("ওয়ালেট") },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = RoyalGoldTextOn,
+                                    selectedTextColor = RoyalGold,
+                                    indicatorColor = RoyalGold,
+                                    unselectedIconColor = RoyalTextSecondary,
+                                    unselectedTextColor = RoyalTextSecondary
+                                ),
+                                modifier = Modifier.testTag("nav_wallet")
+                            )
+                        }
+                    }
+                }''', 1)
+s = s.replace('''                                modifier = Modifier.testTag("nav_invite")
+                            )
+                        }
+                    }
+
+                    Column(modifier = Modifier.fillMaxSize())''', '''                                modifier = Modifier.testTag("nav_invite")
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            NavigationRailItem(
+                                selected = activeTab == AppTab.WALLET,
+                                onClick = { activeTab = AppTab.WALLET },
+                                icon = { Text("৳") },
+                                label = { Text("ওয়ালেট") },
+                                colors = NavigationRailItemDefaults.colors(
+                                    selectedIconColor = RoyalGoldTextOn,
+                                    selectedTextColor = RoyalGold,
+                                    indicatorColor = RoyalGold,
+                                    unselectedIconColor = RoyalTextSecondary,
+                                    unselectedTextColor = RoyalTextSecondary
+                                ),
+                                modifier = Modifier.testTag("nav_wallet")
+                            )
+                        }
+                    }
+
+                    Column(modifier = Modifier.fillMaxSize())''', 1)
+s = s.replace('''                            AppTab.INVITE -> {
+                                InviteAndRulesScreen(''', '''                            AppTab.INVITE -> {
+                                InviteAndRulesScreen(''', 1)
+s = s.replace('''                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        }
+                    }''', '''                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                            AppTab.WALLET -> {
+                                RoyalWalletScreen(
+                                    onDeposit = {
+                                        coroutineScope.launch {
+                                            snackbarHostState.showSnackbar("ডেমো: জমা সেবা এখনো চালু হয়নি। কোনো টাকা পাঠাবেন না।")
+                                        }
+                                    },
+                                    onWithdraw = {
+                                        coroutineScope.launch {
+                                            snackbarHostState.showSnackbar("ডেমো: উত্তোলন সেবা এখনো চালু হয়নি।")
+                                        }
+                                    },
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        }
+                    }''', 1)
+wallet = '''
+@Composable
+private fun RoyalWalletScreen(
+    onDeposit: () -> Unit,
+    onWithdraw: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        Text("ROYAL WALLET", style = MaterialTheme.typography.headlineSmall, color = RoyalGold)
+        Column(
+            modifier = Modifier.fillMaxWidth()
+                .clip(RoundedCornerShape(20.dp))
+                .background(Brush.linearGradient(listOf(Color(0xFF243A5E), Color(0xFF111D34))))
+                .border(1.dp, RoyalGold.copy(alpha = 0.35f), RoundedCornerShape(20.dp))
+                .padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text("ওয়ালেট ব্যালেন্স", style = MaterialTheme.typography.labelLarge, color = RoyalTextSecondary)
+            Text("৳ ০.০০", style = MaterialTheme.typography.displaySmall, color = RoyalGold)
+            Text("এটি কেবল ডেমো ব্যালেন্স; বাস্তব অর্থ নয়।", style = MaterialTheme.typography.bodySmall, color = RoyalTextSecondary)
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+            Button(
+                onClick = onDeposit,
+                modifier = Modifier.weight(1f).height(52.dp).testTag("wallet_deposit"),
+                colors = ButtonDefaults.buttonColors(containerColor = RoyalGold, contentColor = RoyalGoldTextOn),
+                shape = RoundedCornerShape(14.dp)
+            ) { Text("＋ টাকা জমা") }
+            OutlinedButton(
+                onClick = onWithdraw,
+                modifier = Modifier.weight(1f).height(52.dp).testTag("wallet_withdraw"),
+                shape = RoundedCornerShape(14.dp)
+            ) { Text("↑ টাকা উত্তোলন", color = RoyalGold) }
+        }
+        Column(
+            modifier = Modifier.fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(RoyalNavyPanelBottom)
+                .border(1.dp, RoyalNavyBorder, RoundedCornerShape(16.dp))
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text("লেনদেনের অবস্থা", style = MaterialTheme.typography.titleMedium, color = RoyalGold)
+            Text("জমা ও উত্তোলনের অপশন রাখা হয়েছে। তবে এখনো কোনো পেমেন্ট গেটওয়ে, ব্যাংক/মোবাইল অ্যাকাউন্ট বা সার্ভার যুক্ত করা হয়নি।", color = RoyalTextPrimary, style = MaterialTheme.typography.bodyMedium)
+            Text("নিরাপত্তা ও প্রয়োজনীয় আইনগত অনুমোদন নিশ্চিত না হওয়া পর্যন্ত বাস্তব টাকা পাঠাবেন না।", color = RoyalTextSecondary, style = MaterialTheme.typography.bodySmall)
+        }
+    }
+}
+
+'''
+anchor = "@Composable\nprivate fun ActionButtonRow("
+if (!s.includes(anchor)) throw new Error("wallet insertion anchor missing");
+if (!s.includes("private fun RoyalWalletScreen(")) s = s.replace(anchor, wallet + anchor, 1);
+
 # Upgrade the default bot from a simple progress-first picker to a tactical
 # evaluator. The game remains offline and deterministic in its rules.
 vm_path = p.parent / "game" / "LudoViewModel.kt"
