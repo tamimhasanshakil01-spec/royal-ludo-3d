@@ -379,3 +379,221 @@ icon_path.write_text("""<?xml version="1.0" encoding="utf-8"?>
         android:pathData="M54,67 m-3.5,0 a3.5,3.5 0 1,0 7,0 a3.5,3.5 0 1,0 -7,0" />
 </vector>
 """, encoding="utf-8")
+
+
+# ---------------------------------------------------------------------------
+# Premium Royal Ludo lobby: make this the first screen shown when the APK opens.
+# The actual game remains behind PLAY NOW; this lobby is real Compose UI, not a
+# flattened screenshot, so its controls remain interactive and accessible.
+main_path = p.parent.parent / "src" / "main" / "java" / "com" / "example" / "MainActivity.kt"
+ms = main_path.read_text(encoding="utf-8")
+
+ms = ms.replace("enum class AppTab {\\n    PLAY,", "enum class AppTab {\\n    HOME,\\n    PLAY,", 1)
+ms = ms.replace("var activeTab by rememberSaveable { mutableStateOf(AppTab.PLAY) }",
+                "var activeTab by rememberSaveable { mutableStateOf(AppTab.HOME) }", 1)
+ms = ms.replace("if (activeTab != AppTab.PLAY) {\\n        BackHandler { activeTab = AppTab.PLAY }",
+                "if (activeTab != AppTab.HOME) {\\n        BackHandler { activeTab = AppTab.HOME }", 1)
+
+# Insert HOME navigation item in compact bottom navigation and wide navigation rail.
+mobile_anchor = """                            NavigationBarItem(
+                                selected = activeTab == AppTab.PLAY,"""
+mobile_home = """                            NavigationBarItem(
+                                selected = activeTab == AppTab.HOME,
+                                onClick = { activeTab = AppTab.HOME },
+                                icon = { Text("👑") },
+                                label = { Text(if (isBangla) "হোম" else "Home") },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = RoyalGoldTextOn,
+                                    selectedTextColor = RoyalGold,
+                                    indicatorColor = RoyalGold,
+                                    unselectedIconColor = RoyalTextSecondary,
+                                    unselectedTextColor = RoyalTextSecondary
+                                ),
+                                modifier = Modifier.testTag("nav_home")
+                            )
+                            NavigationBarItem(
+                                selected = activeTab == AppTab.PLAY,"""
+if 'testTag("nav_home")' not in ms:
+    ms = ms.replace(mobile_anchor, mobile_home, 1)
+
+rail_anchor = """                            NavigationRailItem(
+                                selected = activeTab == AppTab.PLAY,"""
+rail_home = """                            NavigationRailItem(
+                                selected = activeTab == AppTab.HOME,
+                                onClick = { activeTab = AppTab.HOME },
+                                icon = { Text("👑") },
+                                label = { Text(if (isBangla) "হোম" else "Home") },
+                                colors = NavigationRailItemDefaults.colors(
+                                    selectedIconColor = RoyalGoldTextOn,
+                                    selectedTextColor = RoyalGold,
+                                    indicatorColor = RoyalGold,
+                                    unselectedIconColor = RoyalTextSecondary,
+                                    unselectedTextColor = RoyalTextSecondary
+                                ),
+                                modifier = Modifier.testTag("nav_home")
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            NavigationRailItem(
+                                selected = activeTab == AppTab.PLAY,"""
+if ms.count('testTag("nav_home")') < 2:
+    ms = ms.replace(rail_anchor, rail_home, 1)
+
+# Route the HOME tab to the lobby and keep the existing PLAY tab as the game.
+when_anchor = """                        when (activeTab) {
+                            AppTab.PLAY -> {"""
+when_home = """                        when (activeTab) {
+                            AppTab.HOME -> {
+                                RoyalLobbyScreen(
+                                    isBangla = isBangla,
+                                    onPlay = { activeTab = AppTab.PLAY },
+                                    onInvite = { activeTab = AppTab.INVITE },
+                                    onWallet = { activeTab = AppTab.WALLET },
+                                    onRules = { showRulesDialog = true },
+                                    onToggleLanguage = { isBangla = !isBangla },
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                            AppTab.PLAY -> {"""
+if "RoyalLobbyScreen(" not in ms:
+    ms = ms.replace(when_anchor, when_home, 1)
+
+lobby = r'''
+@Composable
+private fun RoyalLobbyScreen(
+    isBangla: Boolean,
+    onPlay: () -> Unit,
+    onInvite: () -> Unit,
+    onWallet: () -> Unit,
+    onRules: () -> Unit,
+    onToggleLanguage: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val gold = Color(0xFFFFD45A)
+    val deep = Color(0xFF080F2D)
+    Column(
+        modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState())
+            .background(Brush.verticalGradient(listOf(Color(0xFF142A70), deep, Color(0xFF240C42))))
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp))
+                .background(Brush.horizontalGradient(listOf(Color(0xFF101B43), Color(0xFF243A72))))
+                .border(1.dp, gold.copy(alpha = .8f), RoundedCornerShape(22.dp))
+                .padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(48.dp).clip(RoundedCornerShape(24.dp))
+                    .background(Brush.radialGradient(listOf(Color(0xFFFFE28A), Color(0xFFB66A12)))),
+                    contentAlignment = Alignment.Center) {
+                    Text("👑", style = MaterialTheme.typography.headlineMedium)
+                }
+                Spacer(Modifier.width(9.dp))
+                Column {
+                    Text(if (isBangla) "রয়্যাল প্লেয়ার" else "ROYAL PLAYER",
+                        color = Color.White, style = MaterialTheme.typography.titleMedium)
+                    Text(if (isBangla) "স্বাগতম" else "WELCOME BACK",
+                        color = gold, style = MaterialTheme.typography.labelSmall)
+                }
+            }
+            OutlinedButton(onClick = onToggleLanguage, contentPadding = PaddingValues(horizontal = 12.dp, vertical = 2.dp),
+                shape = RoundedCornerShape(18.dp)) {
+                Text(if (isBangla) "EN" else "বাংলা", color = gold)
+            }
+        }
+
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text("👑  ROYAL", color = gold, style = MaterialTheme.typography.displaySmall)
+            Text("LUDO 3D", color = Color.White, style = MaterialTheme.typography.displayMedium)
+            Text(if (isBangla) "খেলো • উপভোগ করো • জেতো" else "PLAY  •  ENJOY  •  WIN",
+                color = Color(0xFFFFE9A6), style = MaterialTheme.typography.titleSmall)
+        }
+
+        // Decorative 3D-inspired board made from live Compose elements.
+        Column(
+            Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp))
+                .background(Brush.verticalGradient(listOf(Color(0xFFFFD979), Color(0xFF9C5417))))
+                .border(2.dp, Color(0xFFFFE9A6), RoundedCornerShape(22.dp)).padding(7.dp)
+        ) {
+            Row(Modifier.fillMaxWidth().height(104.dp)) {
+                LobbyBoardHome(Color(0xFFD92742), "🔴", Modifier.weight(1f))
+                LobbyBoardHome(Color(0xFF22A96B), "🟢", Modifier.weight(1f))
+            }
+            Box(Modifier.fillMaxWidth().height(48.dp).background(Color(0xFFFFF5D8)),
+                contentAlignment = Alignment.Center) {
+                Text("⚄     🎲     ⚄", style = MaterialTheme.typography.headlineLarge, color = Color(0xFF15264C))
+            }
+            Row(Modifier.fillMaxWidth().height(104.dp)) {
+                LobbyBoardHome(Color(0xFF2479E8), "🔵", Modifier.weight(1f))
+                LobbyBoardHome(Color(0xFFF4BE22), "🟡", Modifier.weight(1f))
+            }
+        }
+
+        Button(
+            onClick = onPlay,
+            modifier = Modifier.fillMaxWidth().height(66.dp)
+                .border(2.dp, Color(0xFFFFE8A1), RoundedCornerShape(20.dp))
+                .testTag("lobby_play_now"),
+            shape = RoundedCornerShape(20.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC51E2C), contentColor = Color.White),
+            contentPadding = PaddingValues(10.dp)
+        ) {
+            Text("▶", color = gold, style = MaterialTheme.typography.headlineMedium)
+            Spacer(Modifier.width(12.dp))
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(if (isBangla) "এখনই খেলুন" else "PLAY NOW", style = MaterialTheme.typography.headlineSmall)
+                Text(if (isBangla) "গেম স্ক্রিন খুলুন" else "ENTER THE GAME", style = MaterialTheme.typography.labelSmall)
+            }
+        }
+
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            LobbyAction("🎁", if (isBangla) "দৈনিক পুরস্কার" else "Daily Rewards", Modifier.weight(1f)) { onRules() }
+            LobbyAction("🏆", if (isBangla) "লিডারবোর্ড" else "Leaderboard", Modifier.weight(1f)) { onRules() }
+            LobbyAction("👑", "VIP Club", Modifier.weight(1f)) { onRules() }
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            LobbyAction("💼", if (isBangla) "ওয়ালেট" else "Wallet", Modifier.weight(1f), onWallet)
+            LobbyAction("🤝", if (isBangla) "বন্ধু আমন্ত্রণ" else "Refer & Invite", Modifier.weight(1f), onInvite)
+            LobbyAction("❔", if (isBangla) "কীভাবে খেলবেন" else "How to Play", Modifier.weight(1f), onRules)
+        }
+        Text(if (isBangla) "ROYAL LUDO 3D  •  স্মার্টভাবে খেলুন" else "ROYAL LUDO 3D  •  PLAY SMART",
+            color = gold, style = MaterialTheme.typography.labelMedium,
+            textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp))
+    }
+}
+
+@Composable
+private fun LobbyBoardHome(color: Color, pawn: String, modifier: Modifier = Modifier) {
+    Box(modifier.fillMaxSize().padding(3.dp).clip(RoundedCornerShape(13.dp))
+        .background(Brush.linearGradient(listOf(color, color.copy(alpha = .68f))))
+        .border(1.dp, Color.White.copy(alpha = .75f), RoundedCornerShape(13.dp)),
+        contentAlignment = Alignment.Center) {
+        Text(pawn, style = MaterialTheme.typography.displayLarge)
+    }
+}
+
+@Composable
+private fun LobbyAction(icon: String, label: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    OutlinedButton(
+        onClick = onClick, modifier = modifier.height(76.dp),
+        shape = RoundedCornerShape(15.dp),
+        contentPadding = PaddingValues(4.dp),
+        colors = androidx.compose.material3.ButtonDefaults.outlinedButtonColors(
+            containerColor = Color(0xFF171B45), contentColor = Color.White
+        )
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+            Text(icon, style = MaterialTheme.typography.titleLarge)
+            Text(label, style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center, maxLines = 2)
+        }
+    }
+}
+
+'''
+if "private fun RoyalLobbyScreen(" not in ms:
+    ms += "\n" + lobby
+
+main_path.write_text(ms, encoding="utf-8")
