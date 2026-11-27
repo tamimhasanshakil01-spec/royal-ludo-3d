@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const { HOME, GOAL, SAFE, legalTokenIndices, applyMove, nextTurn } = require("../lib/ludo.js");
 
 test("a token leaves home only on a six", () => {
-  assert.deepEqual(legalTokenIndices([HOME, 0, 55, GOAL], 5), []);
+  assert.deepEqual(legalTokenIndices([HOME, 0, 55, GOAL], 5), [1]);
   assert.deepEqual(legalTokenIndices([HOME, 0, 55, GOAL], 6), [0, 1]);
 });
 
