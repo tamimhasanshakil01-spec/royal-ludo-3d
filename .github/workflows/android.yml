@@ -33,6 +33,9 @@ jobs:
           test -s app/google-services.json
           echo "Matching Firebase Android app configuration installed."
 
+      - name: Integrate Android Firebase online game client
+        run: python3 .github/scripts/integrate_online_android.py
+
       - name: Apply Royel Ludo 3D UI polish
         run: python3 .github/scripts/polish_ui.py app/src/main/java/com/example/MainActivity.kt
 
