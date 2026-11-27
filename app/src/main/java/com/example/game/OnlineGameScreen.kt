@@ -122,7 +122,7 @@ fun OnlineGameScreen(isBangla: Boolean, modifier: Modifier = Modifier) {
                     Text("Status: ${room?.get("status") ?: "connecting"}")
                     Text("${if (isBangla) "খেলোয়াড়" else "Players"}: ${players.size}/2")
                     players.forEachIndexed { index, player ->
-                        Text("${index + 1}. ${if (player == botUid) "Royel Bot" else if (player == uid) (if (isBangla) "আপনি" else "You") else player.take(8)}")
+                        Text("${index + 1}. ${if (player == botUid) "Royal Bot" else if (player == uid) (if (isBangla) "আপনি" else "You") else player.take(8)}")
                     }
                     if (winner != null) Text(if (winner == uid) (if (isBangla) "আপনি জিতেছেন!" else "You won!") else (if (isBangla) "ম্যাচ শেষ" else "Match complete"))
                     else Text(if (myTurn) (if (isBangla) "আপনার চাল" else "Your turn") else (if (isBangla) "প্রতিপক্ষের চাল" else "Opponent's turn"))
