@@ -59,7 +59,7 @@ if "private fun RoyalQuickStartCard(" not in s:
     s = s.replace(anchor, card + anchor, 1)
 
 
-// Wallet tab: UI-only placeholders, with no account collection or real-money flow.
+# Wallet tab: UI-only placeholders, with no account collection or real-money flow.
 s = s.replace("    INVITE\n}", "    INVITE,\n    WALLET\n}")
 s = s.replace('''                                modifier = Modifier.testTag("nav_invite")
                             )
