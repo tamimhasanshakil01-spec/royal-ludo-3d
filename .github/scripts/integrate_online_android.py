@@ -44,7 +44,7 @@ class OnlineGameRepository(
     }
 
     fun createRoom(): Task<Map<String, Any>> = call("createRoom", emptyMap())
-
+\n    fun createBotRoom(): Task<Map<String, Any>> = call("createBotRoom", emptyMap())\n\n    fun playBotTurn(roomId: String, stateVersion: Long): Task<Map<String, Any>> =\n        call("playBotTurn", mapOf("roomId" to roomId, "stateVersion" to stateVersion))\n
     fun joinRoom(roomId: String): Task<Map<String, Any>> =
         call("joinRoom", mapOf("roomId" to roomId.trim()))
 
