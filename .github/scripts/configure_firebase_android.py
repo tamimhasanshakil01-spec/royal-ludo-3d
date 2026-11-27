@@ -11,7 +11,19 @@ text = text.replace("  // Uncomment to use Firestore:\n  // implementation(libs.
                     "  implementation(libs.firebase.firestore)")
 text = text.replace("  // implementation(libs.firebase.auth)",
                     "  implementation(libs.firebase.auth)")
+text = text.replace("  // implementation(libs.firebase.functions)",
+                    "  implementation(libs.firebase.functions)")
 gradle.write_text(text, encoding="utf-8")
+
+catalog = root / "gradle/libs.versions.toml"
+text = catalog.read_text(encoding="utf-8")
+if "firebase-functions =" not in text:
+    text = text.replace(
+        "firebase-firestore = { group = \"com.google.firebase\", name = \"firebase-firestore\" }",
+        "firebase-firestore = { group = \"com.google.firebase\", name = \"firebase-firestore\" }\\n"
+        "firebase-functions = { group = \"com.google.firebase\", name = \"firebase-functions\" }"
+    )
+catalog.write_text(text, encoding="utf-8")
 
 manifest = root / "app/src/main/AndroidManifest.xml"
 text = manifest.read_text(encoding="utf-8")
@@ -33,6 +45,7 @@ import android.content.Context
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.functions.FirebaseFunctions
 
 /** Firebase services are available only when the real app config is present. */
 object FirebaseBackend {
@@ -54,6 +67,7 @@ object FirebaseBackend {
     val isConfigured: Boolean get() = firebaseApp != null
     fun auth(): FirebaseAuth? = firebaseApp?.let { FirebaseAuth.getInstance(it) }
     fun firestore(): FirebaseFirestore? = firebaseApp?.let { FirebaseFirestore.getInstance(it) }
+    fun functions(): FirebaseFunctions? = firebaseApp?.let { FirebaseFunctions.getInstance(it) }
 }
 """, encoding="utf-8")
 
