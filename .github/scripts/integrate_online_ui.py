@@ -282,4 +282,29 @@ fun OnlineGameScreen(isBangla: Boolean, modifier: Modifier = Modifier) {
     }
 }
 ''', encoding="utf-8")
+# The product mode is single-player versus the server bot only.
+screen = Path("app/src/main/java/com/example/game/OnlineGameScreen.kt")
+screen_text = screen.read_text(encoding="utf-8")
+screen_text, removed = re.subn(
+    r'(?s)\\n                    OutlinedButton\\(onClick = \\{.*?Text\\(if \\(isBangla\\) "রুমে যোগ দিন" else "Join room"\\)\\n                    \\}\\n',
+    '',
+    screen_text,
+    count=1
+)
+if removed != 1:
+    raise SystemExit("Could not remove private-room controls; refusing a partial UI patch.")
+screen_text = screen_text.replace(
+    'if (waiting) Text(if (isBangla) "বন্ধুর যোগ দেওয়ার অপেক্ষায়... রুম কোড শেয়ার করুন" else "Waiting for a friend to join. Share the room code.")',
+    ''
+)
+screen_text = screen_text.replace(
+    '"সার্ভার-নিয়ন্ত্রিত ডাইস ও চাল। বন্ধুদের সাথে প্রাইভেট রুম অথবা সার্ভার বটের বিপক্ষে খেলুন."',
+    '"সার্ভার-নিয়ন্ত্রিত ডাইস ও চাল। এককভাবে Royal Expert Bot-এর বিপক্ষে খেলুন."'
+).replace(
+    '"Server-authoritative dice and moves. Play a private match with a friend or challenge the server bot."',
+    '"Server-authoritative dice and moves. Challenge the Royal Expert Bot in single-player mode."'
+)
+screen.write_text(screen_text, encoding="utf-8")
+print("Single-player bot-only lobby applied; private-room controls removed.")
+
 print("Online lobby now supports private two-player rooms and server-bot matches.")

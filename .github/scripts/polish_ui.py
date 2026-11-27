@@ -340,6 +340,19 @@ s = s.replace('''            IconButton(
                 onClick = onOpenProfiles,''', 1)
 
 p.write_text(s, encoding="utf-8")
+# Force one human versus one expert bot; disable the extra two seats.
+vm_s = vm_s.replace("""            GamePreset.VS_BOTS -> mapOf(
+                PlayerColor.RED to SeatControl.HUMAN,
+                PlayerColor.BLUE to SeatControl.BOT,
+                PlayerColor.YELLOW to SeatControl.BOT,
+                PlayerColor.GREEN to SeatControl.BOT
+            )""", """            GamePreset.VS_BOTS -> mapOf(
+                PlayerColor.RED to SeatControl.HUMAN,
+                PlayerColor.BLUE to SeatControl.BOT,
+                PlayerColor.YELLOW to SeatControl.OFF,
+                PlayerColor.GREEN to SeatControl.OFF
+            )""")
+
 vm_path.write_text(vm_s, encoding="utf-8")
 
 
