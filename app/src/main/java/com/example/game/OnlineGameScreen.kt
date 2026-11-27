@@ -1,6 +1,8 @@
 package com.example.game
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -59,7 +61,7 @@ fun OnlineGameScreen(isBangla: Boolean, modifier: Modifier = Modifier) {
     val myTurn = uid != null && currentTurn == uid
     val active = room?.get("status") == "active"
     val winner = room?.get("winnerUid") as? String
-    val myColor = PlayerColor.entries.getOrNull(players.indexOf(uid)) ?: PlayerColor.RED
+    val myColor = PlayerColor.entries.getOrNull(players.indexOf(uid ?: "")) ?: PlayerColor.RED
     val onlineSeats = PlayerColor.entries.associateWith { color ->
         val player = players.getOrNull(color.ordinal)
         when {
@@ -80,11 +82,11 @@ fun OnlineGameScreen(isBangla: Boolean, modifier: Modifier = Modifier) {
     val onlineUiState = LudoUiState(
         seats = onlineSeats,
         pieces = onlinePieces,
-        currentTurn = PlayerColor.entries.getOrNull(players.indexOf(currentTurn)) ?: PlayerColor.RED,
+        currentTurn = PlayerColor.entries.getOrNull(players.indexOf(currentTurn ?: "")) ?: PlayerColor.RED,
         diceValue = dice ?: 1,
         hasRolled = dice != null,
         movableTokenIndices = onlineLegalMoves,
-        winner = PlayerColor.entries.getOrNull(players.indexOf(winner))
+        winner = PlayerColor.entries.getOrNull(players.indexOf(winner ?: ""))
     )
 
     LaunchedEffect(roomId, currentTurn, version, uid) {
@@ -94,7 +96,7 @@ fun OnlineGameScreen(isBangla: Boolean, modifier: Modifier = Modifier) {
         }
     }
 
-    Column(modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(if (isBangla) "অনলাইন লুডু" else "Online Ludo", style = MaterialTheme.typography.headlineMedium)
         Text(if (isBangla) "সার্ভার-নিয়ন্ত্রিত ডাইস ও চাল • লাইভ রুম" else "Server-authoritative dice and moves • live room sync")
         if (roomId.isBlank()) {
