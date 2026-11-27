@@ -1,5 +1,5 @@
 
-name: Build Royel Ludo 3D APK
+name: Build Royal Ludo 3D APK
 
 on:
   push:
@@ -40,28 +40,28 @@ jobs:
       - name: Connect online game screen to Android navigation
         run: python3 .github/scripts/integrate_online_ui.py
 
-      - name: Apply Royel Ludo 3D UI polish
+      - name: Apply Royal Ludo 3D UI polish
         run: python3 .github/scripts/polish_ui.py app/src/main/java/com/example/MainActivity.kt
 
-      - name: Apply Royel Ludo 3D branding
+      - name: Apply Royal Ludo 3D branding
         run: |
           python3 - <<'PY'
           from pathlib import Path
           strings = Path('app/src/main/res/values/strings.xml')
           s = strings.read_text(encoding='utf-8')
-          s = s.replace('Royal Ludo 3D', 'Royel Ludo 3D').replace('ROYAL LUDO 3D', 'ROYEL LUDO 3D').replace('ROYAL WALLET', 'ROYEL WALLET')
+          s = s.replace('Royal Ludo 3D', 'Royal Ludo 3D').replace('ROYAL LUDO 3D', 'ROYEL LUDO 3D').replace('ROYAL WALLET', 'ROYEL WALLET')
           strings.write_text(s, encoding='utf-8')
           main = Path('app/src/main/java/com/example/MainActivity.kt')
           s = main.read_text(encoding='utf-8')
           s = s.replace('ROYAL LUDO 3D', 'ROYEL LUDO 3D').replace('ROYAL WALLET', 'ROYEL WALLET')
           main.write_text(s, encoding='utf-8')
-          print('App branding set to Royel Ludo 3D; Firebase project identifiers left unchanged.')
+          print('App branding set to Royal Ludo 3D; Firebase project identifiers left unchanged.')
           PY
 
       - name: Package final Android source for review
         uses: actions/upload-artifact@v4
         with:
-          name: Royel-Ludo-Source
+          name: Royal-Ludo-Source
           path: |
             app/
             gradle/
@@ -112,7 +112,7 @@ jobs:
       - name: Upload Firebase signing fingerprint
         uses: actions/upload-artifact@v4
         with:
-          name: Royel-Firebase-SHA1-Fingerprint
+          name: Royal-Firebase-SHA1-Fingerprint
           path: firebase-sha1.txt
 
       - name: Build APK
@@ -122,5 +122,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Royel-Ludo-3D-APK
+          name: Royal-Ludo-3D-APK
           path: app/build/outputs/apk/debug/*.apk
