@@ -1,16 +1,21 @@
 # Backend implementation status
 
-Implemented foundation:
-- Firebase project configuration and Firestore rules.
-- Authenticated room creation and joining.
-- Server-generated dice rolls using cryptographic randomness.
-- Transactional state-version checks and immutable action events.
+## Implemented in repository
+- Firebase Android app configuration is present in `firebase/google-services.json` and copied into the Android build.
+- Firestore rules deny all client writes to game state, profiles and wallet data.
+- Callable functions require Firebase Authentication.
+- Room creation and joining are transactional; each player receives four home tokens.
+- Dice are generated server-side using cryptographic randomness.
+- `moveToken` validates membership, turn, state version, token index and legal progress on the server; captures, safe squares, exact home entry, bonus rolls and match completion are calculated server-side.
+- `passTurn` only permits a pass when no legal token move exists.
+- Game actions are recorded in immutable server-created event documents.
+- Android debug build workflow compiles and uploads a debug APK artifact.
 
-Not yet implemented:
-- Server-side token movement and full Ludo rules engine.
-- Bot decision engine running on the server.
-- Reconnection/matchmaking queue, account UI and Firebase Android SDK integration.
-- Wallet ledger, referral attribution, admin console and leaderboard aggregation.
-- Automated emulator/security tests and deployment.
+## Not yet complete or verified
+- The Android client is not yet wired to call the room, dice, move and pass callable functions or subscribe to the authoritative room state. Its current gameplay logic still runs locally.
+- Server-side bot turns, matchmaking/reconnection, account/profile flows and end-to-end online UX are not complete.
+- Emulator/unit/security tests and deployment to the Firebase project have not been run.
+- The Android workflow's successful build demonstrates compilation only, not online gameplay or release readiness.
+- Real-money deposits, wagering and withdrawals remain disabled. Any future money feature requires jurisdiction-specific legal review, compliant payment-provider approval, KYC/AML and responsible-play safeguards.
 
-The app must not claim online play is ready until these pieces are completed and deployed. Real-money features remain disabled pending legal and payment-provider review.
+Do not advertise the app as a completed online multiplayer game until client integration, tests, deployment and end-to-end verification pass.
