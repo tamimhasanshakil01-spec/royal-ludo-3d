@@ -6,6 +6,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.firebase.firestore.DocumentSnapshot
+import com.example.game.LudoUiState
+import com.example.game.PlayerColor
+import com.example.game.SeatControl
+import com.example.ui.components.RoyalLudoBoard
 import kotlinx.coroutines.delay
 
 @Composable
@@ -55,6 +59,33 @@ fun OnlineGameScreen(isBangla: Boolean, modifier: Modifier = Modifier) {
     val myTurn = uid != null && currentTurn == uid
     val active = room?.get("status") == "active"
     val winner = room?.get("winnerUid") as? String
+    val myColor = PlayerColor.entries.getOrNull(players.indexOf(uid)) ?: PlayerColor.RED
+    val onlineSeats = PlayerColor.entries.associateWith { color ->
+        val player = players.getOrNull(color.ordinal)
+        when {
+            player == null -> SeatControl.OFF
+            player == botUid -> SeatControl.BOT
+            else -> SeatControl.HUMAN
+        }
+    }
+    val onlinePieces = PlayerColor.entries.associateWith { color ->
+        val player = players.getOrNull(color.ordinal)
+        (pieces?.get(player) as? List<*>)?.mapNotNull { (it as? Number)?.toInt() } ?: listOf(-1, -1, -1, -1)
+    }
+    val onlineLegalMoves = if (myTurn && dice != null) {
+        tokens.mapIndexedNotNull { index, progress ->
+            if ((progress == -1 && dice == 6) || (progress >= 0 && progress < 56 && progress + dice <= 56)) index else null
+        }.toSet()
+    } else emptySet()
+    val onlineUiState = LudoUiState(
+        seats = onlineSeats,
+        pieces = onlinePieces,
+        currentTurn = PlayerColor.entries.getOrNull(players.indexOf(currentTurn)) ?: PlayerColor.RED,
+        diceValue = dice ?: 1,
+        hasRolled = dice != null,
+        movableTokenIndices = onlineLegalMoves,
+        winner = PlayerColor.entries.getOrNull(players.indexOf(winner))
+    )
 
     LaunchedEffect(roomId, currentTurn, version, uid) {
         if (roomId.isNotBlank() && uid != null && currentTurn == botUid && active && winner == null) {
@@ -115,6 +146,19 @@ fun OnlineGameScreen(isBangla: Boolean, modifier: Modifier = Modifier) {
                     if (winner != null) Text(if (winner == uid) (if (isBangla) "আপনি জিতেছেন!" else "You won!") else (if (isBangla) "ম্যাচ শেষ" else "Match complete"))
                     else Text(if (myTurn) (if (isBangla) "আপনার চাল" else "Your turn") else (if (isBangla) "প্রতিপক্ষের চাল" else "Opponent's turn"))
                 }
+            }
+            if (room != null) {
+                RoyalLudoBoard(
+                    uiState = onlineUiState,
+                    onTokenClick = { color, index ->
+                        if (color == myColor && myTurn && dice != null) {
+                            handle(repo.moveToken(roomId, version, index)) {
+                                message = if (isBangla) "চাল সম্পন্ন" else "Move completed"
+                            }
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
             if (active && winner == null) {
                 Card(Modifier.fillMaxWidth()) {
