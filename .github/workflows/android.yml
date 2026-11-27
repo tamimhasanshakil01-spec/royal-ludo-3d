@@ -37,6 +37,9 @@ jobs:
       - name: Integrate Android Firebase online game client
         run: python3 .github/scripts/integrate_online_android.py
 
+      - name: Connect online game screen to Android navigation
+        run: python3 .github/scripts/integrate_online_ui.py
+
       - name: Apply Royel Ludo 3D UI polish
         run: python3 .github/scripts/polish_ui.py app/src/main/java/com/example/MainActivity.kt
 
