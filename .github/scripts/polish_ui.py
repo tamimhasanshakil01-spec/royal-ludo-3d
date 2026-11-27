@@ -57,4 +57,90 @@ if anchor not in s:
     raise SystemExit("ActionButtonRow anchor missing")
 if "private fun RoyalQuickStartCard(" not in s:
     s = s.replace(anchor, card + anchor, 1)
+
+# Upgrade the default bot from a simple progress-first picker to a tactical
+# evaluator. The game remains offline and deterministic in its rules.
+ai_start = s.find("    private fun chooseBotToken(")
+ai_end = s.find("\n    private fun detectPreset(", ai_start)
+if ai_start < 0 or ai_end < 0:
+    raise SystemExit("Could not locate chooseBotToken() for AI upgrade")
+smart_ai = """    private fun chooseBotToken(
+        bot: PlayerColor,
+        movableIndices: Set<Int>,
+        dice: Int,
+        state: LudoUiState
+    ): Int {
+        val botPieces = state.pieces[bot].orEmpty()
+        return movableIndices.maxByOrNull { tokenIndex ->
+            val currentProgress = botPieces.getOrNull(tokenIndex) ?: LudoBoardGeometry.HOME_YARD
+            val targetProgress = if (currentProgress == LudoBoardGeometry.HOME_YARD) 0
+                else currentProgress + dice
+            val targetAbs = LudoBoardGeometry.absoluteTrackIndex(bot, targetProgress)
+            var score = 0
+
+            // Core progress and finishing priorities.
+            score += if (currentProgress == LudoBoardGeometry.HOME_YARD) 260 else dice * 24
+            if (targetProgress == LudoBoardGeometry.GOAL_PROGRESS) score += 5000
+            if (targetProgress in 51..55 && currentProgress <= 50) score += 520
+            if (currentProgress in 0..50 && targetProgress > 50) score += 180
+            if (currentProgress == LudoBoardGeometry.HOME_YARD && dice == 6) score += 300
+
+            if (targetAbs != null) {
+                val isSafe = targetAbs in LudoBoardGeometry.safeTrackIndices
+                if (isSafe) score += 420
+
+                // Capturing an opponent is a strong tactical move.
+                if (!isSafe) {
+                    val captured = PlayerColor.entries
+                        .filter { it != bot }
+                        .sumOf { opponent ->
+                            state.pieces[opponent].orEmpty().count { opponentProgress ->
+                                LudoBoardGeometry.absoluteTrackIndex(opponent, opponentProgress) == targetAbs
+                            }
+                        }
+                    score += captured * 1350
+                }
+
+                // Avoid landing on exposed squares that an opponent can reach
+                // with a single die roll on their next turn.
+                if (!isSafe) {
+                    var attackers = 0
+                    for (opponent in PlayerColor.entries) {
+                        if (opponent == bot) continue
+                        for (opponentProgress in state.pieces[opponent].orEmpty()) {
+                            val opponentAbs = LudoBoardGeometry.absoluteTrackIndex(opponent, opponentProgress)
+                                ?: continue
+                            val distance = (targetAbs - opponentAbs + LudoBoardGeometry.outerTrack.size) %
+                                LudoBoardGeometry.outerTrack.size
+                            if (distance in 1..6) attackers++
+                        }
+                    }
+                    score -= attackers * 210
+                }
+
+                // Prefer moving a piece out of immediate danger.
+                if (currentProgress in 0..50) {
+                    val currentAbs = LudoBoardGeometry.absoluteTrackIndex(bot, currentProgress)
+                    if (currentAbs != null && currentAbs !in LudoBoardGeometry.safeTrackIndices) {
+                        val threatened = PlayerColor.entries.any { opponent ->
+                            opponent != bot && state.pieces[opponent].orEmpty().any { opponentProgress ->
+                                val opponentAbs = LudoBoardGeometry.absoluteTrackIndex(opponent, opponentProgress)
+                                opponentAbs != null &&
+                                    ((currentAbs - opponentAbs + LudoBoardGeometry.outerTrack.size) %
+                                        LudoBoardGeometry.outerTrack.size) in 1..6
+                            }
+                        }
+                        if (threatened) score += 160
+                    }
+                }
+            }
+
+            // Small stable tie-break preference for advancing the most developed piece.
+            score += targetProgress.coerceAtLeast(0) * 2
+            score + Random.nextInt(0, 18)
+        } ?: movableIndices.first()
+    }
+"""
+s = s[:ai_start] + smart_ai + s[ai_end:]
+
 p.write_text(s, encoding="utf-8")
