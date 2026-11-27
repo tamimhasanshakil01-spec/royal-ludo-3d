@@ -19,6 +19,7 @@ jobs:
         run: |
           npm install --no-audit --no-fund
           npm run build
+          npm test
 
       - name: Extract Android project
         run: |
