@@ -344,7 +344,7 @@ vm_path.write_text(vm_s, encoding="utf-8")
 
 
 # A vivid, adaptive launcher emblem: royal crown, four player colors and a dice.
-icon_path = p.parents[2] / "res" / "drawable" / "ic_launcher_foreground.xml"
+icon_path = p.parents[3] / "res" / "drawable" / "ic_launcher_foreground.xml"
 icon_path.write_text("""<?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp" android:height="108dp"
