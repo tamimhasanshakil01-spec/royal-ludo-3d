@@ -1,0 +1,28 @@
+{
+  "project_info": {
+    "project_number": "828998325832",
+    "project_id": "royel-ludo-3d",
+    "storage_bucket": "royel-ludo-3d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:828998325832:android:bc7df2a2c07226139e2a7d",
+        "android_client_info": {
+          "package_name": "com.aistudio.royalludo.kqvmrx"
+        }
+      },
+      "api_key": [
+        {
+          "current_key": "AIzaSyDI1Ya7YmOnxa32MIsl9c4qR3tdq83int0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
