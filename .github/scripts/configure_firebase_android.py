@@ -11,8 +11,11 @@ text = text.replace("  // Uncomment to use Firestore:\n  // implementation(libs.
                     "  implementation(libs.firebase.firestore)")
 text = text.replace("  // implementation(libs.firebase.auth)",
                     "  implementation(libs.firebase.auth)")
-text = text.replace("  // implementation(libs.firebase.functions)",
-                    "  implementation(libs.firebase.functions)")
+if "implementation(libs.firebase.functions)" not in text:
+    text = text.replace(
+        "  implementation(libs.firebase.auth)",
+        "  implementation(libs.firebase.auth)\\n  implementation(libs.firebase.functions)"
+    )
 gradle.write_text(text, encoding="utf-8")
 
 catalog = root / "gradle/libs.versions.toml"
