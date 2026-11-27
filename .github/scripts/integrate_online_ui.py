@@ -285,12 +285,15 @@ fun OnlineGameScreen(isBangla: Boolean, modifier: Modifier = Modifier) {
 # The product mode is single-player versus the server bot only.
 screen = Path("app/src/main/java/com/example/game/OnlineGameScreen.kt")
 screen_text = screen.read_text(encoding="utf-8")
-screen_text, removed = re.subn(
-    r'(?s)\\n                    OutlinedButton\\(onClick = \\{.*?Text\\(if \\(isBangla\\) "রুমে যোগ দিন" else "Join room"\\)\\n                    \\}\\n',
-    '',
-    screen_text,
-    count=1
-)
+lobby_start = screen_text.find('if (roomId.isBlank())')
+control_start = screen_text.find('                    OutlinedButton(onClick = {', lobby_start)
+join_label = 'Text(if (isBangla) "রুমে যোগ দিন" else "Join room")'
+join_start = screen_text.find(join_label, control_start)
+control_end = screen_text.find('\\n                    }', join_start)
+if min(lobby_start, control_start, join_start, control_end) < 0:
+    raise SystemExit("Could not locate private-room controls; refusing a partial UI patch.")
+control_end += len('\\n                    }')
+screen_text = screen_text[:control_start] + screen_text[control_end:]
 if removed != 1:
     raise SystemExit("Could not remove private-room controls; refusing a partial UI patch.")
 screen_text = screen_text.replace(
