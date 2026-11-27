@@ -305,8 +305,6 @@ screen_text = screen_text.replace(
     '"Server-authoritative dice and moves. Challenge the Royal Expert Bot in single-player mode."'
 )
 screen.write_text(screen_text, encoding="utf-8")
- Private-room controls are
-# not wired into the requested single-player flow and are not advertised here.
 screen_text = screen_text.replace(
     'if (waiting) Text(if (isBangla) "বন্ধুর যোগ দেওয়ার অপেক্ষায়... রুম কোড শেয়ার করুন" else "Waiting for a friend to join. Share the room code.")',
     ''
