@@ -22,3 +22,10 @@ Last reviewed: 2026-11-28
 - Real-money deposits, wagering and withdrawals are intentionally disabled and are outside this completion stage. Any future money features require legal review, approved payment-provider support, KYC/AML and responsible-play safeguards.
 
 Do not describe the app as production-ready or as completed human-versus-human online multiplayer until deployment, real-device end-to-end testing and the required feature work pass.
+
+
+## Firebase deployment automation added
+- Added a manual GitHub Actions workflow at `.github/workflows/firebase-deploy.yml`.
+- The workflow builds and tests Cloud Functions, authenticates with a repository Actions secret named `FIREBASE_SERVICE_ACCOUNT_ROYEL_LUDO_3D`, then deploys Firestore rules and Cloud Functions to the existing project `royel-ludo-3d`.
+- The workflow is manual-only; it does not deploy automatically on every push.
+- Deployment remains blocked until the repository secret is added and the Google service account has the required project permissions. Cloud Functions deployment may also require the Firebase project to be on the Blaze billing plan; no billing change has been made or authorized.
