@@ -1,6 +1,12 @@
 name: Deploy Royal Ludo 3D Firestore Rules (Free Tier)
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'firestore.rules'
+      - 'firebase.json'
+      - '.github/workflows/deploy-firebase.yml'
   workflow_dispatch:
 
 permissions:
