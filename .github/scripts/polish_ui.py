@@ -341,3 +341,41 @@ s = s.replace('''            IconButton(
 
 p.write_text(s, encoding="utf-8")
 vm_path.write_text(vm_s, encoding="utf-8")
+
+
+# A vivid, adaptive launcher emblem: royal crown, four player colors and a dice.
+icon_path = p.parents[2] / "res" / "drawable" / "ic_launcher_foreground.xml"
+icon_path.write_text("""<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <path android:fillColor="#FFD54F"
+        android:pathData="M24,30 L17,17 L35,26 L54,10 L73,26 L91,17 L84,30 L79,39 L29,39 Z" />
+    <path android:fillColor="#FFF0A6"
+        android:pathData="M29,34 L79,34 L75,43 L33,43 Z" />
+    <path android:fillColor="#D99B26"
+        android:pathData="M30,43 L78,43 L75,49 L33,49 Z" />
+    <path android:fillColor="#F04452"
+        android:pathData="M20,59 m-9,0 a9,9 0 1,0 18,0 a9,9 0 1,0 -18,0" />
+    <path android:fillColor="#3989FF"
+        android:pathData="M88,59 m-9,0 a9,9 0 1,0 18,0 a9,9 0 1,0 -18,0" />
+    <path android:fillColor="#27C27A"
+        android:pathData="M31,87 m-9,0 a9,9 0 1,0 18,0 a9,9 0 1,0 -18,0" />
+    <path android:fillColor="#FFC928"
+        android:pathData="M77,87 m-9,0 a9,9 0 1,0 18,0 a9,9 0 1,0 -18,0" />
+    <path android:fillColor="#FFFDF6"
+        android:pathData="M37,49 L71,49 Q77,49 77,55 L77,79 Q77,85 71,85 L37,85 Q31,85 31,79 L31,55 Q31,49 37,49 Z" />
+    <path android:fillColor="#DCE6F4"
+        android:pathData="M31,76 L77,76 L77,80 Q77,85 71,85 L37,85 Q31,85 31,80 Z" />
+    <path android:fillColor="#F04452"
+        android:pathData="M43,59 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0" />
+    <path android:fillColor="#3989FF"
+        android:pathData="M65,59 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0" />
+    <path android:fillColor="#27C27A"
+        android:pathData="M43,75 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0" />
+    <path android:fillColor="#FFC928"
+        android:pathData="M65,75 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0" />
+    <path android:fillColor="#D99B26"
+        android:pathData="M54,67 m-3.5,0 a3.5,3.5 0 1,0 7,0 a3.5,3.5 0 1,0 -7,0" />
+</vector>
+""", encoding="utf-8")
