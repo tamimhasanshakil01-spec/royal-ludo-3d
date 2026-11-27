@@ -3,8 +3,9 @@ import sys
 
 path = Path(sys.argv[1])
 source = path.read_text(encoding="utf-8")
-anchor = "@Composable\\nprivate fun ActionButtonRow("
-card = '''@Composable
+nl = chr(10)
+anchor = "@Composable" + nl + "private fun ActionButtonRow("
+card = r"""@Composable
 private fun RoyalWelcomeCard() {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -67,13 +68,13 @@ private fun RoyalWelcomeCard() {
         }
     }
 }
-
-\'''
-if source.count("                PlayerHudRow(\\n") != 2:
+"""
+needle = "                PlayerHudRow(" + nl
+if source.count(needle) != 2:
     raise SystemExit("Expected exactly two game HUD insertion points; no source changed")
 if anchor not in source:
     raise SystemExit("ActionButtonRow anchor not found; no source changed")
-source = source.replace("                PlayerHudRow(\\n", "                RoyalWelcomeCard()\\n                PlayerHudRow(\\n")
-source = source.replace(anchor, card + anchor, 1)
+source = source.replace(needle, "                RoyalWelcomeCard()" + nl + needle)
+source = source.replace(anchor, card + nl + anchor, 1)
 path.write_text(source, encoding="utf-8")
 print(f"Updated {path}: added premium Royal Arena welcome card to both layouts")
