@@ -36,4 +36,4 @@ bKash/Nagad merchant payments or deploy Cloud Functions.
 
 ## Deploying the admin server functions
 
-The Android build checks the TypeScript functions but does not deploy them. Deploy with `firebase deploy --only functions --project royel-ludo-3d` from a trusted, authenticated environment. Cloud Functions deployment may require the Firebase project to use the Blaze billing plan. Confirm the project's billing plan and budget alerts before deployment. Never paste service-account private keys into chat or commit them to the repository.
+The Android build checks the TypeScript functions but does not deploy them. Deploy from GitHub Actions → **Deploy Royal Ludo 3D Cloud Functions** → **Run workflow**, after adding the `FIREBASE_SERVICE_ACCOUNT_ROYEL_LUDO_3D` repository secret; alternatively run `firebase deploy --only functions --project royel-ludo-3d` from a trusted, authenticated environment. Cloud Functions deployment may require the Firebase project to use the Blaze billing plan. Confirm the project's billing plan and budget alerts before deployment. Never paste service-account private keys into chat or commit them to the repository.
