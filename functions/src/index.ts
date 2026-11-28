@@ -51,11 +51,14 @@ export const createRoom = onCall(async (request) => {
 /** Creates or updates a verified player's public profile using the authenticated UID. */
 export const registerProfile = onCall(async (request) => {
   const uid = requireUid(request);
-  const email = String(request.auth?.token?.email ?? "").trim().toLowerCase();
-  const emailVerified = request.auth?.token?.email_verified === true;
+  const token = request.auth?.token ?? {};
+  const email = String(token.email ?? "").trim().toLowerCase();
+  const emailVerified = token.email_verified === true;
+  const phoneNumber = String(token.phone_number ?? "").trim();
+  const phoneVerified = phoneNumber.length > 0;
   const displayName = String(request.data?.displayName ?? "").trim().slice(0, 40);
-  if (!email || !emailVerified) {
-    throw new HttpsError("failed-precondition", "A verified email address is required.");
+  if (!(email && emailVerified) && !phoneVerified) {
+    throw new HttpsError("failed-precondition", "A verified email address or phone number is required.");
   }
   if (displayName.length < 2) {
     throw new HttpsError("invalid-argument", "A display name of at least 2 characters is required.");
@@ -64,9 +67,11 @@ export const registerProfile = onCall(async (request) => {
   await db.runTransaction(async (tx) => {
     const snap = await tx.get(ref);
     const profile: Record<string, unknown> = {
-      uid, email, displayName, status: "active",
+      uid, displayName, status: "active",
       updatedAt: FieldValue.serverTimestamp()
     };
+    if (email && emailVerified) profile.email = email;
+    if (phoneVerified) profile.phoneNumber = phoneNumber;
     if (!snap.exists) profile.createdAt = FieldValue.serverTimestamp();
     tx.set(ref, profile, { merge: true });
   });
