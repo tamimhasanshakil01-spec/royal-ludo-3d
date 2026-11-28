@@ -51,7 +51,7 @@ export const createRoom = onCall(async (request) => {
 /** Creates or updates a verified player's public profile using the authenticated UID. */
 export const registerProfile = onCall(async (request) => {
   const uid = requireUid(request);
-  const token = request.auth?.token ?? {};
+  const token: Record<string, unknown> = request.auth?.token ?? {};
   const email = String(token.email ?? "").trim().toLowerCase();
   const emailVerified = token.email_verified === true;
   const phoneNumber = String(token.phone_number ?? "").trim();
