@@ -124,12 +124,12 @@ s = s.replace('''                                    modifier = Modifier.weight(
                                 RoyalWalletScreen(
                                     onDeposit = {
                                         coroutineScope.launch {
-                                            snackbarHostState.showSnackbar("ডেমো: জমা সেবা এখনো চালু হয়নি। কোনো টাকা পাঠাবেন না।")
+                                            snackbarHostState.showSnackbar("ডেমো: কাল্পনিক পয়েন্ট যোগের সেবা এখনো চালু হয়নি।")
                                         }
                                     },
                                     onWithdraw = {
                                         coroutineScope.launch {
-                                            snackbarHostState.showSnackbar("ডেমো: উত্তোলন সেবা এখনো চালু হয়নি।")
+                                            snackbarHostState.showSnackbar("ডেমো: পয়েন্ট ফেরতের সেবা এখনো চালু হয়নি।")
                                         }
                                     },
                                     modifier = Modifier.weight(1f)
@@ -149,7 +149,7 @@ private fun RoyalWalletScreen(
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        Text("ROYAL WALLET", style = MaterialTheme.typography.headlineSmall, color = RoyalGold)
+        Text("ROYAL DEMO WALLET", style = MaterialTheme.typography.headlineSmall, color = RoyalGold)
         Column(
             modifier = Modifier.fillMaxWidth()
                 .clip(RoundedCornerShape(20.dp))
@@ -158,9 +158,9 @@ private fun RoyalWalletScreen(
                 .padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text("ওয়ালেট ব্যালেন্স", style = MaterialTheme.typography.labelLarge, color = RoyalTextSecondary)
-            Text("৳ ০.০০", style = MaterialTheme.typography.displaySmall, color = RoyalGold)
-            Text("এটি কেবল ডেমো ব্যালেন্স; বাস্তব অর্থ নয়।", style = MaterialTheme.typography.bodySmall, color = RoyalTextSecondary)
+            Text("ডেমো পয়েন্ট", style = MaterialTheme.typography.labelLarge, color = RoyalTextSecondary)
+            Text("০ পয়েন্ট", style = MaterialTheme.typography.displaySmall, color = RoyalGold)
+            Text("শুধু পরীক্ষার কাল্পনিক পয়েন্ট; কোনো আর্থিক মূল্য নেই।", style = MaterialTheme.typography.bodySmall, color = RoyalTextSecondary)
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
             Button(
@@ -168,12 +168,12 @@ private fun RoyalWalletScreen(
                 modifier = Modifier.weight(1f).height(52.dp).testTag("wallet_deposit"),
                 colors = ButtonDefaults.buttonColors(containerColor = RoyalGold, contentColor = RoyalGoldTextOn),
                 shape = RoundedCornerShape(14.dp)
-            ) { Text("＋ টাকা জমা") }
+            ) { Text("＋ ডেমো যোগ") }
             OutlinedButton(
                 onClick = onWithdraw,
                 modifier = Modifier.weight(1f).height(52.dp).testTag("wallet_withdraw"),
                 shape = RoundedCornerShape(14.dp)
-            ) { Text("↑ টাকা উত্তোলন", color = RoyalGold) }
+            ) { Text("↗ ডেমো ফেরত", color = RoyalGold) }
         }
         Column(
             modifier = Modifier.fillMaxWidth()
@@ -183,9 +183,9 @@ private fun RoyalWalletScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text("লেনদেনের অবস্থা", style = MaterialTheme.typography.titleMedium, color = RoyalGold)
-            Text("জমা ও উত্তোলনের অপশন রাখা হয়েছে। তবে এখনো কোনো পেমেন্ট গেটওয়ে, ব্যাংক/মোবাইল অ্যাকাউন্ট বা সার্ভার যুক্ত করা হয়নি।", color = RoyalTextPrimary, style = MaterialTheme.typography.bodyMedium)
-            Text("নিরাপত্তা ও প্রয়োজনীয় আইনগত অনুমোদন নিশ্চিত না হওয়া পর্যন্ত বাস্তব টাকা পাঠাবেন না।", color = RoyalTextSecondary, style = MaterialTheme.typography.bodySmall)
+            Text("ডেমো হিসাবের অবস্থা", style = MaterialTheme.typography.titleMedium, color = RoyalGold)
+            Text("এই বোতামগুলো শুধু ডেমো। কোনো পেমেন্ট গেটওয়ে, ব্যাংক/মোবাইল অ্যাকাউন্ট বা বাস্তব লেনদেন যুক্ত নেই।", color = RoyalTextPrimary, style = MaterialTheme.typography.bodyMedium)
+            Text("পয়েন্ট কেনা, বিক্রি, বাজি, স্থানান্তর বা নগদে রূপান্তর করা যাবে না।", color = RoyalTextSecondary, style = MaterialTheme.typography.bodySmall)
         }
     }
 }
