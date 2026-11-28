@@ -40,6 +40,9 @@ jobs:
       - name: Connect online game screen to Android navigation
         run: python3 .github/scripts/integrate_online_ui.py
 
+      - name: Integrate offline Snakes and Ladders game
+        run: python3 .github/scripts/integrate_snakes_ladders.py
+
       - name: Enable single-player against three bots
         run: python3 .github/scripts/enable_single_human_mode.py
 
