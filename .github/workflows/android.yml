@@ -40,9 +40,6 @@ jobs:
       - name: Connect online game screen to Android navigation
         run: python3 .github/scripts/integrate_online_ui.py
 
-      - name: Integrate protected admin dashboard
-        run: python3 .github/scripts/integrate_admin_dashboard.py
-
       - name: Add permanent verified-email accounts
         run: python3 .github/scripts/add_permanent_accounts.py
 
@@ -60,6 +57,9 @@ jobs:
 
       - name: Apply Royal Ludo 3D UI polish
         run: python3 .github/scripts/polish_ui.py app/src/main/java/com/example/MainActivity.kt
+
+      - name: Integrate protected admin dashboard
+        run: python3 .github/scripts/integrate_admin_dashboard.py
 
       - name: Apply Royal Ludo 3D branding
         run: |
