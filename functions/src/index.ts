@@ -374,6 +374,55 @@ export const getFictionalWallet = onCall(async (request) => {
   };
 });
 
+/** Admin-only player directory with fictional wallet balances. */
+export const adminListPlayers = onCall(async (request) => {
+  requireAdmin(request);
+  const requested = Number(request.data?.limit ?? 100);
+  const limit = Number.isSafeInteger(requested) ? Math.max(1, Math.min(100, requested)) : 100;
+  const users = await db.collection("users").orderBy("createdAt", "desc").limit(limit).get();
+  const players = await Promise.all(users.docs.map(async (doc) => {
+    const profile = doc.data();
+    const wallet = await db.collection("wallets").doc(doc.id).get();
+    return {
+      uid: doc.id,
+      displayName: String(profile.displayName ?? "Player"),
+      email: String(profile.email ?? ""),
+      phoneNumber: String(profile.phoneNumber ?? ""),
+      status: String(profile.status ?? "active"),
+      balance: Number(wallet.data()?.balance ?? 0)
+    };
+  }));
+  return { players, count: players.length, fictional: true };
+});
+
+/** Admin-only recent ledger for one player's fictional wallet. */
+export const adminGetPlayerLedger = onCall(async (request) => {
+  requireAdmin(request);
+  const playerUid = String(request.data?.playerUid ?? "").trim();
+  if (!/^[A-Za-z0-9:_-]{1,128}$/.test(playerUid)) {
+    throw new HttpsError("invalid-argument", "A valid player UID is required.");
+  }
+  const requested = Number(request.data?.limit ?? 30);
+  const limit = Number.isSafeInteger(requested) ? Math.max(1, Math.min(50, requested)) : 30;
+  const snapshot = await db.collection("wallets").doc(playerUid)
+    .collection("ledger").orderBy("createdAt", "desc").limit(limit).get();
+  return {
+    playerUid,
+    transactions: snapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        amount: Number(data.amount ?? 0),
+        direction: String(data.direction ?? ""),
+        note: String(data.note ?? ""),
+        balanceAfter: Number(data.balanceAfter ?? 0),
+        createdAt: data.createdAt?.toMillis?.() ?? null
+      };
+    }),
+    fictional: true
+  };
+});
+
 /** Admin-only adjustment of a fictional, non-transferable game balance. */
 export const adminAdjustFictionalWallet = onCall(async (request) => {
   const adminUid = requireAdmin(request);
