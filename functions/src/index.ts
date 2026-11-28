@@ -329,3 +329,97 @@ export const passTurn = onCall(async (request) => {
   });
   return { stateVersion: nextVersion, currentTurnUid: nextUid };
 });
+
+
+/**
+ * Fictional, non-redeemable game balance. This is not money and must never
+ * be used for stakes, deposits, withdrawals, transfers, or cash conversion.
+ * Admin access is granted only through Firebase Auth custom claim { admin: true }.
+ */
+function requireAdmin(request: { auth?: { uid: string; token?: Record<string, unknown> } | null }): string {
+  const uid = requireUid(request);
+  if (request.auth?.token?.admin !== true) {
+    throw new HttpsError("permission-denied", "Administrator access is required.");
+  }
+  return uid;
+}
+
+function validAmount(value: unknown): number {
+  const amount = Number(value);
+  if (!Number.isSafeInteger(amount) || amount < 1 || amount > 1000000) {
+    throw new HttpsError("invalid-argument", "Amount must be a whole number between 1 and 1,000,000 fictional units.");
+  }
+  return amount;
+}
+
+/** Returns the signed-in player's fictional wallet balance and recent ledger. */
+export const getFictionalWallet = onCall(async (request) => {
+  const uid = requireUid(request);
+  const walletRef = db.collection("wallets").doc(uid);
+  const [wallet, ledger] = await Promise.all([
+    walletRef.get(),
+    walletRef.collection("ledger").orderBy("createdAt", "desc").limit(20).get()
+  ]);
+  return {
+    balance: Number(wallet.data()?.balance ?? 0),
+    currencyLabel: "৳",
+    fictional: true,
+    transactions: ledger.docs.map((doc) => ({
+      id: doc.id,
+      amount: Number(doc.data().amount ?? 0),
+      direction: String(doc.data().direction ?? ""),
+      note: String(doc.data().note ?? ""),
+      createdAt: doc.data().createdAt?.toMillis?.() ?? null
+    }))
+  };
+});
+
+/** Admin-only adjustment of a fictional, non-transferable game balance. */
+export const adminAdjustFictionalWallet = onCall(async (request) => {
+  const adminUid = requireAdmin(request);
+  const targetUid = String(request.data?.playerUid ?? "").trim();
+  if (!/^[A-Za-z0-9:_-]{1,128}$/.test(targetUid)) {
+    throw new HttpsError("invalid-argument", "A valid player UID is required.");
+  }
+  const direction = request.data?.direction;
+  if (direction !== "credit" && direction !== "debit") {
+    throw new HttpsError("invalid-argument", "Direction must be credit or debit.");
+  }
+  const amount = validAmount(request.data?.amount);
+  const note = String(request.data?.note ?? "").trim().slice(0, 120);
+  if (note.length < 3) {
+    throw new HttpsError("invalid-argument", "A short reason is required.");
+  }
+
+  const walletRef = db.collection("wallets").doc(targetUid);
+  const ledgerRef = walletRef.collection("ledger").doc();
+  let newBalance = 0;
+  await db.runTransaction(async (tx) => {
+    const snap = await tx.get(walletRef);
+    const oldBalance = Number(snap.data()?.balance ?? 0);
+    if (!Number.isSafeInteger(oldBalance) || oldBalance < 0) {
+      throw new HttpsError("failed-precondition", "Wallet balance is invalid.");
+    }
+    newBalance = direction === "credit" ? oldBalance + amount : oldBalance - amount;
+    if (!Number.isSafeInteger(newBalance) || newBalance < 0 || newBalance > 1000000000) {
+      throw new HttpsError("failed-precondition", "Adjustment would create an invalid balance.");
+    }
+    tx.set(walletRef, {
+      balance: newBalance,
+      fictional: true,
+      redeemable: false,
+      transferable: false,
+      updatedAt: FieldValue.serverTimestamp()
+    }, { merge: true });
+    tx.create(ledgerRef, {
+      amount,
+      direction,
+      note,
+      adminUid,
+      balanceAfter: newBalance,
+      fictional: true,
+      createdAt: FieldValue.serverTimestamp()
+    });
+  });
+  return { playerUid: targetUid, balance: newBalance, fictional: true };
+});
