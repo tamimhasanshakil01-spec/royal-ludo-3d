@@ -79,7 +79,7 @@ fun SnakesAndLaddersScreen(isBangla: Boolean, modifier: Modifier = Modifier) {
             items((100 downTo 1).toList()) { cell ->
                 val row = (100 - cell) / 10
                 val col = (100 - cell) % 10
-                val number = if (row % 2 == 0) cell else row * 10 + (11 - col)
+                val number = if (row % 2 == 0) cell else row * 10 + (10 - col)
                 val occupants = active.filter { it.position == number }
                 Box(Modifier.aspectRatio(1f).border(1.dp, Color(0xFF52627C), RoundedCornerShape(4.dp)).background(
                     when { starts.containsKey(number) -> Color(0xFF285B4D); drops.containsKey(number) -> Color(0xFF713B49); else -> if ((row + col) % 2 == 0) Color(0xFF172943) else Color(0xFF203653) },
