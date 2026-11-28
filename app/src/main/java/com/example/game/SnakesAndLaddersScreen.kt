@@ -41,6 +41,12 @@ fun SnakesAndLaddersScreen(isBangla: Boolean, modifier: Modifier = Modifier) {
         if (rolling || winner >= 0) return
         rolling = true
     }
+    LaunchedEffect(turn, rolling, winner, count) {
+        if (winner < 0 && !rolling && active.getOrNull(turn)?.bot == true) {
+            delay(650L)
+            rolling = true
+        }
+    }
     LaunchedEffect(rolling) {
         if (rolling) {
             repeat(8) { dice = Random.nextInt(1, 7); delay(65) }
