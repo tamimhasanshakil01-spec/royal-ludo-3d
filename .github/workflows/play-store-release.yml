@@ -37,7 +37,7 @@ jobs:
           python3 .github/scripts/integrate_online_android.py
           python3 .github/scripts/integrate_online_ui.py
           python3 .github/scripts/integrate_snakes_ladders.py
-          python3 .github/scripts/enable_single_human_mode.py
+          python3 .github/scripts/integrate_admob.py\n          python3 .github/scripts/enable_single_human_mode.py
           python3 .github/scripts/polish_ui.py app/src/main/java/com/example/MainActivity.kt
 
       - name: Setup Java
