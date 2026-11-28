@@ -5,21 +5,23 @@ gradle = Path("app/build.gradle.kts")
 g = gradle.read_text(encoding="utf-8")
 dep = '  implementation("com.google.android.gms:play-services-ads:23.6.0")'
 if dep not in g:
-    if "dependencies {" not in g: raise SystemExit("Gradle dependencies block not found")
-    g = g.replace("dependencies {", "dependencies {\\n" + dep, 1)
+    if "dependencies {" not in g:
+        raise SystemExit("Gradle dependencies block not found")
+    g = g.replace("dependencies {", "dependencies {\n" + dep, 1)
 if 'buildConfigField("String", "ADMOB_BANNER_ID"' not in g:
     anchor = '    versionName = "1.0"'
     banner = os.getenv("ADMOB_BANNER_ID", "ca-app-pub-3940256099942544/6300978111")
     app_id = os.getenv("ADMOB_APP_ID", "ca-app-pub-3940256099942544~3347511713")
-    addition = '\\n    buildConfigField("String", "ADMOB_BANNER_ID", "\\\"' + banner + '\\\")'
-    addition += '\\n    manifestPlaceholders["ADMOB_APP_ID"] = "' + app_id + '"'
+    addition = '\n    buildConfigField("String", "ADMOB_BANNER_ID", "\\"' + banner + '\\"")'
+    addition += '\n    manifestPlaceholders["ADMOB_APP_ID"] = "' + app_id + '"'
     g = g.replace(anchor, anchor + addition, 1)
 gradle.write_text(g, encoding="utf-8")
 
 manifest = Path("app/src/main/AndroidManifest.xml")
 m = manifest.read_text(encoding="utf-8")
 if 'com.google.android.gms.ads.APPLICATION_ID' not in m:
-    m = m.replace('        android:allowBackup=', '        <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="${ADMOB_APP_ID}" />\\n        android:allowBackup=', 1)
+    meta = '        <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="$' + '{ADMOB_APP_ID}" />\n'
+    m = m.replace('        android:allowBackup=', meta + '        android:allowBackup=', 1)
 manifest.write_text(m, encoding="utf-8")
 
 game = Path("app/src/main/java/com/example/game/SnakesAndLaddersScreen.kt")
@@ -47,6 +49,6 @@ private fun RoyalAdBanner() {
 '''
 needle = '        else SnakesAndLaddersScreen(isBangla = isBangla, modifier = Modifier.weight(1f))'
 if "        RoyalAdBanner()" not in s:
-    s = s.replace(needle, needle + "\\n        RoyalAdBanner()", 1)
+    s = s.replace(needle, needle + "\n        RoyalAdBanner()", 1)
 game.write_text(s, encoding="utf-8")
 print("AdMob banner integration added; release requires production AdMob IDs.")
