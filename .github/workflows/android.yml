@@ -46,6 +46,12 @@ jobs:
       - name: Add verified phone-number SMS OTP authentication
         run: python3 .github/scripts/add_phone_auth.py
 
+      - name: Verify phone-number login is present in Android source
+        run: |
+          grep -q 'AccountMethod.PHONE' app/src/main/java/com/example/game/AccountAccessScreen.kt
+          grep -q 'PhoneAuthProvider.verifyPhoneNumber' app/src/main/java/com/example/game/AccountAccessScreen.kt
+          grep -q 'PhoneAuthProvider.getCredential' app/src/main/java/com/example/game/AccountAccessScreen.kt
+
       - name: Enable single-player against one expert bot
         run: python3 .github/scripts/enable_single_human_mode.py
 
