@@ -7,81 +7,41 @@ nl = chr(10)
 if "import com.example.game.AdminDashboardScreen" not in s:
     anchor = "import com.example.game.OnlineGameScreen"
     if anchor not in s:
-        raise SystemExit("Admin integration stopped: online screen import missing.")
+        raise SystemExit("Admin integration stopped: online game import not found.")
     s = s.replace(anchor, anchor + nl + "import com.example.game.AdminDashboardScreen", 1)
 
-if "var showAdminPanel by rememberSaveable" not in s:
-    anchor = "    var activeTab by rememberSaveable { mutableStateOf(AppTab.HOME) }"
-    if anchor not in s:
-        raise SystemExit("Admin integration stopped: activeTab state not found.")
-    s = s.replace(anchor, anchor + nl + "    var showAdminPanel by rememberSaveable { mutableStateOf(false) }", 1)
+start = s.find("private fun RoyalWalletScreen(")
+if start < 0:
+    raise SystemExit("Admin integration stopped: RoyalWalletScreen not found.")
+body_open = s.find(") {", start)
+if body_open < 0:
+    raise SystemExit("Admin integration stopped: wallet function body not found.")
+body_open += 3
+if "var showAdminPanel by rememberSaveable" not in s[start:]:
+    wrapper = nl + "    var showAdminPanel by rememberSaveable { mutableStateOf(false) }" + nl + "    if (showAdminPanel) {" + nl + "        AdminDashboardScreen(isBangla = isBangla, onBack = { showAdminPanel = false }, modifier = modifier)" + nl + "    } else {"
+    s = s[:body_open] + wrapper + s[body_open:]
 
-wallet_open = nl.join([
-    "                            AppTab.WALLET -> {",
-    "                                RoyalWalletScreen("
-])
-wallet_replacement = nl.join([
-    "                            AppTab.WALLET -> {",
-    "                                if (showAdminPanel) {",
-    "                                    AdminDashboardScreen(",
-    "                                        isBangla = isBangla,",
-    "                                        onBack = { showAdminPanel = false },",
-    "                                        modifier = Modifier.weight(1f)",
-    "                                    )",
-    "                                } else {",
-    "                                    RoyalWalletScreen("
-])
-if "onAdmin = { showAdminPanel = true }" not in s:
-    if wallet_open not in s:
-        raise SystemExit("Admin integration stopped: Wallet screen call not found.")
-    s = s.replace(wallet_open, wallet_replacement, 1)
-    s = s.replace(
-        "                                    isBangla = isBangla," + nl + "                                    onDeposit = {",
-        "                                    isBangla = isBangla," + nl + "                                    onAdmin = { showAdminPanel = true }," + nl + "                                    onDeposit = {",
-        1
-    )
-    wallet_start = s.index("                            AppTab.WALLET -> {")
-    close_anchor = nl.join([
-        "                                    modifier = Modifier.weight(1f)",
-        "                                )",
-        "                            }",
-        "                        }"
-    ])
-    close_at = s.find(close_anchor, wallet_start)
-    if close_at < 0:
-        raise SystemExit("Admin integration stopped: Wallet branch closing point not found.")
-    s = s[:close_at] + close_anchor.replace("                            }", "                                }" + nl + "                            }", 1) + s[close_at + len(close_anchor):]
-
-signature = nl.join([
-    "private fun RoyalWalletScreen(",
-    "    isBangla: Boolean,",
-    "    onDeposit: () -> Unit,"
-])
-signature_new = nl.join([
-    "private fun RoyalWalletScreen(",
-    "    isBangla: Boolean,",
-    "    onAdmin: () -> Unit,",
-    "    onDeposit: () -> Unit,"
-])
-if signature in s:
-    s = s.replace(signature, signature_new, 1)
-
-actions = nl.join([
-    "        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {",
-    "            Button(",
-    "                onClick = onDeposit,"
-])
-if "onClick = onAdmin" not in s:
-    if actions not in s:
-        raise SystemExit("Admin integration stopped: wallet action buttons not found.")
+# Add the dashboard entry inside the existing wallet screen.
+wallet_title = '        Text(if (isBangla) "রয়্যাল ওয়ালেট" else "ROYAL WALLET", style = MaterialTheme.typography.headlineSmall, color = RoyalGold)'
+if "showAdminPanel = true" not in s:
+    if wallet_title not in s:
+        raise SystemExit("Admin integration stopped: wallet title not found.")
     button = nl.join([
         "        OutlinedButton(",
-        "            onClick = onAdmin,",
-        "            modifier = Modifier.fillMaxWidth().height(48.dp),",
+        "            onClick = { showAdminPanel = true },",
+        "            modifier = Modifier.fillMaxWidth().height(46.dp),",
         "            shape = RoundedCornerShape(14.dp)",
         "        ) { Text(if (isBangla) \"⚙ অ্যাডমিন প্যানেল\" else \"⚙ Admin Panel\", color = RoyalGold) }"
     ])
-    s = s.replace(actions, button + nl + actions, 1)
+    s = s.replace(wallet_title, wallet_title + nl + button, 1)
+
+# Close the local admin-panel else branch before RoyalWalletScreen's function brace.
+end_marker = nl + "}" + nl + nl + "@Composable" + nl + "private fun ActionButtonRow("
+pos = s.find(end_marker, start)
+if pos < 0:
+    raise SystemExit("Admin integration stopped: wallet function end not found.")
+if "AdminDashboardScreen(isBangla = isBangla" in s[start:pos]:
+    s = s[:pos] + nl + "    }" + s[pos:]
 
 p.write_text(s, encoding="utf-8")
-print("Admin panel integrated into Wallet tab.")
+print("Admin dashboard entry and screen integrated into the Wallet page.")
