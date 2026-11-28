@@ -43,6 +43,9 @@ jobs:
       - name: Add permanent verified-email accounts
         run: python3 .github/scripts/add_permanent_accounts.py
 
+      - name: Add verified phone-number SMS OTP authentication
+        run: python3 .github/scripts/add_phone_auth.py
+
       - name: Enable single-player against one expert bot
         run: python3 .github/scripts/enable_single_human_mode.py
 
