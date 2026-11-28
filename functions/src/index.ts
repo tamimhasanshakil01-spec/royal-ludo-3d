@@ -48,6 +48,31 @@ export const createRoom = onCall(async (request) => {
   return { roomId: roomRef.id, stateVersion: 0, status: "waiting" };
 });
 
+/** Creates or updates a verified player's public profile using the authenticated UID. */
+export const registerProfile = onCall(async (request) => {
+  const uid = requireUid(request);
+  const email = String(request.auth?.token?.email ?? "").trim().toLowerCase();
+  const emailVerified = request.auth?.token?.email_verified === true;
+  const displayName = String(request.data?.displayName ?? "").trim().slice(0, 40);
+  if (!email || !emailVerified) {
+    throw new HttpsError("failed-precondition", "A verified email address is required.");
+  }
+  if (displayName.length < 2) {
+    throw new HttpsError("invalid-argument", "A display name of at least 2 characters is required.");
+  }
+  const ref = db.collection("users").doc(uid);
+  await db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    const profile: Record<string, unknown> = {
+      uid, email, displayName, status: "active",
+      updatedAt: FieldValue.serverTimestamp()
+    };
+    if (!snap.exists) profile.createdAt = FieldValue.serverTimestamp();
+    tx.set(ref, profile, { merge: true });
+  });
+  return { playerId: uid, displayName };
+});
+
 const BOT_UID = "ROYEL_BOT";
 
 /** Creates a real server-authoritative human-vs-bot room. */
