@@ -29,3 +29,14 @@ Do not describe the app as production-ready or as completed human-versus-human o
 - The workflow builds and tests Cloud Functions, authenticates with a repository Actions secret named `FIREBASE_SERVICE_ACCOUNT_ROYEL_LUDO_3D`, then deploys Firestore rules and Cloud Functions to the existing project `royel-ludo-3d`.
 - The workflow is manual-only; it does not deploy automatically on every push.
 - Deployment remains blocked until the repository secret is added and the Google service account has the required project permissions. Cloud Functions deployment may also require the Firebase project to be on the Blaze billing plan; no billing change has been made or authorized.
+
+
+## Additional work committed 2026-11-28
+- Added a Snakes & Ladders Compose screen and a Ludo / Snakes & Ladders selector in the PLAY hub. Corrected serpentine board numbering.
+- Added an AdMob SDK integration script and a banner placement in the game hub. Debug builds use Google's test app/ad IDs; production release is configured to require publisher-provided AdMob app and banner IDs.
+- Added a manual signed-AAB release workflow at `.github/workflows/play-store-release.yml`.
+- Added draft privacy policy, Play listing copy and release checklist under `docs/`.
+- These commits have not yet been proven by a successful new CI build. The AdMob integration must be compiled and tested before it is considered verified.
+- A signed Play release is blocked until the owner configures GitHub Actions secrets `UPLOAD_KEYSTORE_BASE64`, `UPLOAD_STORE_PASSWORD`, `UPLOAD_KEY_PASSWORD`, `ADMOB_APP_ID` and `ADMOB_BANNER_ID`. The upload keystore must use alias `upload`.
+- The privacy policy needs a monitored support contact and a public HTTPS URL before Play submission. Store listing artwork and real screenshots are still required.
+- Human-vs-human online matchmaking, full production Firebase deployment, device testing, Play Console declarations and production release review remain outstanding.
