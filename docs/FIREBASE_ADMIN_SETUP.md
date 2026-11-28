@@ -1,8 +1,6 @@
 # Royal Ludo 3D — one-time Firebase admin setup
 
-The repository already contains the server-side callable `adminAdjustFictionalWallet`.
-It checks the Firebase Auth custom claim `admin: true`; changing an email address
-in app code does not grant administrator rights.
+The repository contains the protected server-side callables `adminListPlayers`, `adminGetPlayerLedger`, and `adminAdjustFictionalWallet`. All three require the Firebase Auth custom claim `admin: true`; changing an email address in app code does not grant administrator rights.
 
 ## Owner-only bootstrap
 
@@ -26,7 +24,7 @@ unless the target account exists, is enabled, and has a verified email address.
 ## After bootstrap
 
 The admin signs out and signs back in so the app receives a fresh ID token.
-The app must call the protected callable function; the server verifies the claim.
+The Admin Panel is reachable from Wallet → Admin Panel. It checks the exact verified email and refreshes the Firebase ID token; the server independently verifies the custom claim for every list, ledger, and balance operation. The app calls the protected server functions; it never writes wallet documents directly.
 Never add a public endpoint that lets users grant themselves admin privileges.
 
 ## Important wallet boundary
@@ -34,3 +32,8 @@ Never add a public endpoint that lets users grant themselves admin privileges.
 This wallet is fictional game balance only. It is not money and cannot be purchased,
 redeemed, withdrawn, transferred, or used for stakes. This setup does not configure
 bKash/Nagad merchant payments or deploy Cloud Functions.
+
+
+## Deploying the admin server functions
+
+The Android build checks the TypeScript functions but does not deploy them. Deploy with `firebase deploy --only functions --project royel-ludo-3d` from a trusted, authenticated environment. Cloud Functions deployment may require the Firebase project to use the Blaze billing plan. Confirm the project's billing plan and budget alerts before deployment. Never paste service-account private keys into chat or commit them to the repository.
