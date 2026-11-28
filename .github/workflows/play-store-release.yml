@@ -35,6 +35,9 @@ jobs:
           test -s app/google-services.json
 
       - name: Integrate game features
+        env:
+          ADMOB_APP_ID: ${{ secrets.ADMOB_APP_ID }}
+          ADMOB_BANNER_ID: ${{ secrets.ADMOB_BANNER_ID }}
         run: |
           python3 .github/scripts/integrate_online_android.py
           python3 .github/scripts/integrate_online_ui.py
