@@ -43,7 +43,10 @@ jobs:
       - name: Integrate offline Snakes and Ladders game
         run: python3 .github/scripts/integrate_snakes_ladders.py
 
-      - name: Integrate AdMob banner monetization (test IDs for debug)\n        run: python3 .github/scripts/integrate_admob.py\n\n      - name: Enable single-player against three bots
+      - name: Integrate AdMob banner monetization (test IDs for debug)
+        run: python3 .github/scripts/integrate_admob.py
+
+      - name: Enable single-player against three bots
         run: python3 .github/scripts/enable_single_human_mode.py
 
       - name: Apply Royal Ludo 3D UI polish
