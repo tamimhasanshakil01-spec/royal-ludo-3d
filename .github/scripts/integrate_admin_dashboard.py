@@ -2,18 +2,20 @@ from pathlib import Path
 
 main = Path("app/src/main/java/com/example/MainActivity.kt")
 source = main.read_text(encoding="utf-8")
+nl = chr(10)
 
 if "import com.example.game.AdminDashboardScreen" not in source:
     source = source.replace(
-        "import com.example.game.OnlineGameScreen\\n",
-        "import com.example.game.OnlineGameScreen\\nimport com.example.game.AdminDashboardScreen\\n"
+        "import com.example.game.OnlineGameScreen",
+        "import com.example.game.OnlineGameScreen" + nl + "import com.example.game.AdminDashboardScreen",
+        1
     )
 
 if "var showAdminPanel by rememberSaveable" not in source:
     anchor = "    var activeTab by rememberSaveable { mutableStateOf(AppTab.HOME) }"
     if anchor not in source:
         raise SystemExit("Admin integration stopped: activeTab state anchor not found.")
-    source = source.replace(anchor, anchor + "\\n    var showAdminPanel by rememberSaveable { mutableStateOf(false) }", 1)
+    source = source.replace(anchor, anchor + nl + "    var showAdminPanel by rememberSaveable { mutableStateOf(false) }", 1)
 
 anchor = """                            AppTab.WALLET -> {
                                 RoyalWalletScreen(
@@ -27,15 +29,13 @@ replacement = """                            AppTab.WALLET -> {
                                         modifier = Modifier.weight(1f)
                                     )
                                 } else {
-                                RoyalWalletScreen(
-                                    isBangla = isBangla,
-                                    onAdmin = { showAdminPanel = true },
-                                    isBangla = isBangla,
-                                    onDeposit = {"""
+                                    RoyalWalletScreen(
+                                        isBangla = isBangla,
+                                        onAdmin = { showAdminPanel = true },
+                                        onDeposit = {"""
 if "onAdmin = { showAdminPanel = true }" not in source:
     if anchor not in source:
         raise SystemExit("Admin integration stopped: wallet screen call not found.")
-    replacement = replacement.replace("                                    isBangla = isBangla,\\n                                    onDeposit", "                                    onDeposit")
     source = source.replace(anchor, replacement, 1)
 
 close_anchor = """                                    modifier = Modifier.weight(1f)
@@ -43,7 +43,7 @@ close_anchor = """                                    modifier = Modifier.weight
                             }
                         }"""
 close_replacement = """                                    modifier = Modifier.weight(1f)
-                                )
+                                    )
                                 }
                             }
                         }"""
