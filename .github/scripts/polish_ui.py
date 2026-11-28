@@ -124,12 +124,12 @@ s = s.replace('''                                    modifier = Modifier.weight(
                                 RoyalWalletScreen(
                                     onDeposit = {
                                         coroutineScope.launch {
-                                            snackbarHostState.showSnackbar("পয়েন্ট যোগের সুবিধা এখনো চালু হয়নি।")
+                                            snackbarHostState.showSnackbar("কাল্পনিক ব্যালেন্সে টাকা যোগের সুবিধা এখনো চালু হয়নি।")
                                         }
                                     },
                                     onWithdraw = {
                                         coroutineScope.launch {
-                                            snackbarHostState.showSnackbar("পয়েন্ট ফেরতের সুবিধা এখনো চালু হয়নি।")
+                                            snackbarHostState.showSnackbar("কাল্পনিক ব্যালেন্স থেকে টাকা উত্তোলনের সুবিধা নেই।")
                                         }
                                     },
                                     modifier = Modifier.weight(1f)
@@ -158,9 +158,9 @@ private fun RoyalWalletScreen(
                 .padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text("পয়েন্ট ব্যালেন্স", style = MaterialTheme.typography.labelLarge, color = RoyalTextSecondary)
-            Text("০", style = MaterialTheme.typography.displaySmall, color = RoyalGold)
-            Text("পয়েন্টের কোনো আর্থিক মূল্য নেই।", style = MaterialTheme.typography.bodySmall, color = RoyalTextSecondary)
+            Text("কাল্পনিক টাকা", style = MaterialTheme.typography.labelLarge, color = RoyalTextSecondary)
+            Text("৳ ০.০০", style = MaterialTheme.typography.displaySmall, color = RoyalGold)
+            Text("এটি কাল্পনিক ব্যালেন্স; বাস্তব টাকা নয় এবং উত্তোলনযোগ্য নয়।", style = MaterialTheme.typography.bodySmall, color = RoyalTextSecondary)
         }
         Text("পেমেন্ট সেবা", style = MaterialTheme.typography.titleMedium, color = RoyalGold)
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
@@ -205,7 +205,7 @@ private fun RoyalWalletScreen(
         ) {
             Text("হিসাবের অবস্থা", style = MaterialTheme.typography.titleMedium, color = RoyalGold)
             Text("এখানে বাস্তব অর্থ জমা বা উত্তোলনের সুবিধা নেই।", color = RoyalTextPrimary, style = MaterialTheme.typography.bodyMedium)
-            Text("পয়েন্ট কেনা-বেচা, বাজি, স্থানান্তর বা নগদে রূপান্তর করা যাবে না।", color = RoyalTextSecondary, style = MaterialTheme.typography.bodySmall)
+            Text("এই কাল্পনিক ব্যালেন্স কেনা-বেচা, বাজি, স্থানান্তর বা নগদে রূপান্তর করা যাবে না।", color = RoyalTextSecondary, style = MaterialTheme.typography.bodySmall)
         }
     }
 }
