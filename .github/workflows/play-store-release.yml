@@ -12,9 +12,11 @@ jobs:
           KEY: ${{ secrets.UPLOAD_KEYSTORE_BASE64 }}
           STORE: ${{ secrets.UPLOAD_STORE_PASSWORD }}
           PASS: ${{ secrets.UPLOAD_KEY_PASSWORD }}
+          ADMOB_APP: ${{ secrets.ADMOB_APP_ID }}
+          ADMOB_BANNER: ${{ secrets.ADMOB_BANNER_ID }}
         run: |
-          test -n "$KEY" && test -n "$STORE" && test -n "$PASS" || {
-            echo "::error::Add UPLOAD_KEYSTORE_BASE64, UPLOAD_STORE_PASSWORD and UPLOAD_KEY_PASSWORD repository secrets first."
+          test -n "$KEY" && test -n "$STORE" && test -n "$PASS" && test -n "$ADMOB_APP" && test -n "$ADMOB_BANNER" || {
+            echo "::error::Add upload signing secrets plus ADMOB_APP_ID and ADMOB_BANNER_ID production AdMob secrets first."
             exit 1
           }
 
