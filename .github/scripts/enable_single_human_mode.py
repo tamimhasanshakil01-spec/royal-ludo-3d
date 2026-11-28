@@ -16,8 +16,13 @@ new = """        val sanitizedSeats = when {
             activePlayers.size >= 2 -> seats
             activePlayers.size == 1 -> {
                 val onlyPlayer = activePlayers.first()
+                val expertBot = if (onlyPlayer == PlayerColor.BLUE) PlayerColor.RED else PlayerColor.BLUE
                 PlayerColor.entries.associateWith { color ->
-                    if (color == onlyPlayer) seats[color] ?: SeatControl.HUMAN else SeatControl.BOT
+                    when (color) {
+                        onlyPlayer -> seats[color] ?: SeatControl.HUMAN
+                        expertBot -> SeatControl.BOT
+                        else -> SeatControl.OFF
+                    }
                 }
             }
             else -> mapOf(
@@ -38,4 +43,4 @@ if "val isValid = activeCount >= 2" not in d:
     raise SystemExit("Expected player-count validation was not found.")
 d = d.replace("val isValid = activeCount >= 2", "val isValid = activeCount >= 1", 1)
 dialog.write_text(d, encoding="utf-8")
-print("Applied one-human-plus-three-bots support and minimum-one-player validation.")
+print("Applied one-human-versus-one-expert-bot support and minimum-one-player validation.")
