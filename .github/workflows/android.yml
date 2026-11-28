@@ -43,6 +43,9 @@ jobs:
       - name: Add permanent verified-email accounts
         run: python3 .github/scripts/add_permanent_accounts.py
 
+      - name: Enable single-player against one expert bot
+        run: python3 .github/scripts/enable_single_human_mode.py
+
       - name: Apply Royal Ludo 3D UI polish
         run: python3 .github/scripts/polish_ui.py app/src/main/java/com/example/MainActivity.kt
 
