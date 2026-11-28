@@ -162,6 +162,26 @@ private fun RoyalWalletScreen(
             Text("০", style = MaterialTheme.typography.displaySmall, color = RoyalGold)
             Text("পয়েন্টের কোনো আর্থিক মূল্য নেই।", style = MaterialTheme.typography.bodySmall, color = RoyalTextSecondary)
         }
+        Text("পেমেন্ট সেবা", style = MaterialTheme.typography.titleMedium, color = RoyalGold)
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier.weight(1f).clip(RoundedCornerShape(14.dp))
+                    .background(Color(0xFFE2136E)).padding(14.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text("bKash", color = Color.White, style = MaterialTheme.typography.titleLarge)
+                Text("সংযোগের জন্য প্রস্তুত", color = Color.White, style = MaterialTheme.typography.labelSmall)
+            }
+            Column(
+                modifier = Modifier.weight(1f).clip(RoundedCornerShape(14.dp))
+                    .background(Color(0xFFEF6C00)).padding(14.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text("Nagad", color = Color.White, style = MaterialTheme.typography.titleLarge)
+                Text("সংযোগের জন্য প্রস্তুত", color = Color.White, style = MaterialTheme.typography.labelSmall)
+            }
+        }
+        Text("bKash ও Nagad-এর বাস্তব পেমেন্ট চালু করতে অনুমোদিত মার্চেন্ট সংযোগ প্রয়োজন।", color = RoyalTextSecondary, style = MaterialTheme.typography.bodySmall)
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
             Button(
                 onClick = onDeposit,
