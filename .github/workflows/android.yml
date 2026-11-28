@@ -40,7 +40,11 @@ jobs:
       - name: Connect online game screen to Android navigation
         run: python3 .github/scripts/integrate_online_ui.py
 
-      - name: Integrate protected admin dashboard\n        run: python3 .github/scripts/integrate_admin_dashboard.py\n\n      - name: Add permanent verified-email accounts\n        run: python3 .github/scripts/add_permanent_accounts.py
+      - name: Integrate protected admin dashboard
+        run: python3 .github/scripts/integrate_admin_dashboard.py
+
+      - name: Add permanent verified-email accounts
+        run: python3 .github/scripts/add_permanent_accounts.py
 
       - name: Add verified phone-number SMS OTP authentication
         run: python3 .github/scripts/add_phone_auth.py
